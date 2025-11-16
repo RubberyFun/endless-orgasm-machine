@@ -34,13 +34,13 @@ static const char* CONFIG_FILENAME = "/spiffs/config.json";
 #define GATTS_INPUT2_CHAR_UUID     0x6004
 
 //which pin to read analog pressure sensor from
-#define PRESSURE_GPIO ADC_CHANNEL_0
 //This can accept any ADC_UNIT_1 channel...so ADC_CHANNEL_0 to ADC_CHANNEL_7
-//ADC_CHANNEL_0 is gpio 1 on Waveshare ESP32-S3, labeled 1
-//ADC_CHANNEL_0 is gpio 36 on NodeMCU ESP32S, labeled SVP. (another channel might be more accurate)
-//ADC_CHANNEL_0 is gpio 36 on Wroom32, labeled VP
+#define PRESSURE_GPIO ADC_CHANNEL_0
+//ADC_CHANNEL_0 is gpio 5 on Xaio Seed ESP32-S3, labeled D5 (LED pin is D21) 
+//ADC_CHANNEL_0 is gpio 1 on Waveshare ESP32-S3, labeled 1  (LED pin is 21, ws2812)
+//ADC_CHANNEL_0 is gpio 36 on NodeMCU ESP32S, labeled SVP. (another channel might be more accurate)  (LED pin is 2)
+//ADC_CHANNEL_0 is gpio 36 on Wroom32, labeled VP  (LED pin is 2)
 //ADC_CHANNEL_0 is gpio 0 on Waveshare ESP32-C6-LCD-1.47 labeled 0 (LED pin is 8)
-//ADC_CHANNEL_0 is gpio 0 on Xaio Seed ESP32-S3, labeled D0 
 
 //#define LED_GPIO 2 // This is handled per board in platformio.ini now
 

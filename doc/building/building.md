@@ -4,16 +4,35 @@ Todo: build walkthroughs
 
 # Example builds:
 
+### Tiny tubing build with colored lights (~$60)
+- $7 [Waveshare ESP32-S3](https://www.amazon.com/dp/B0CR2RH7PS)
+- $28 [MPXV5050GP pressure sensor](https://www.digikey.com/en/products/detail/nxp-usa-inc/MPXV5100GP/2186552) + shipping + tax
+- $6 [2mm ID silicone tubing](https://www.amazon.com/Rebower-Silicone-Silicon-Brewing-Aquaponics/dp/B0DSPVD4V7)
+- $8 [1100ma battery with jst 1.5 connector](https://www.amazon.com/dp/B0F1FN9BY6)
+- $6-$11 [USB battery charger](https://www.adafruit.com/product/6091)([amazon source](https://www.amazon.com/Treedix-Protection-Adjustable-Power-Down-Regulation/dp/B09FJJBLQ1) / [amazon source with data passthrough](https://www.amazon.com/Adafruit-4410-Micro-Charger-LiPoly/dp/B08168GWVJ))
+- [3d printed base](../../hardware/plugXS.stl)
+![Waveshare ESP32-S3 tubing build](waveshare_esp32s3_tube_prototype.png)
+---
 ### Custom PCB (~$150): [Mathew3000/nogasm-esp32](https://github.com/Mathew3000/nogasm-esp32) 
 PCB can be ordered online using the files in the repo.  About $150
 ![Mathew3000/nogasm-esp32](Matthew3000-nogasm-esp32.png) 
 
-### Tiny DIY build (WIP)
-- $7 [ESP32-S3 mini](https://www.amazon.com/dp/B0CR2RH7PS)
+
+---
+### Tiny tubing build with integrated battery (~$60)
+- \$8 [Xiao Seeed ESP32-S3](https://www.digikey.com/en/products/detail/seeed-technology-co-ltd/113991114/19285530)  ([$17 on amazon](https://www.amazon.com/ESP32S3-2-4GHz-Dual-core-Supported-Efficiency-Interface/dp/B0BYSB66S5))
+- $28 [MPXV5100GP pressure sensor](https://www.digikey.com/en/products/detail/nxp-usa-inc/MPXV5100GP/2186552) \$20 + shipping + tax
+- $6 [2mm ID silicone tubing](https://www.amazon.com/Rebower-Silicone-Silicon-Brewing-Aquaponics/dp/B0DSPVD4V7)
+- $5 [jst 1.5 connectors](https://www.amazon.com/dp/B07FP2FCYC) 
+- $8 [1100ma 102540 battery with jst 1.5 connector](https://www.amazon.com/dp/B0F1FN9BY6)
+- [3d printed base](../../hardware/plugXS.stl)
+
+
+### Small 18650 inflatable build
+- $7 [Waveshare ESP32-S3](https://www.amazon.com/dp/B0CR2RH7PS)
 - $20 [MPXV5100GP pressure sensor](https://www.digikey.com/en/products/detail/nxp-usa-inc/MPXV5100GP/2186552)
 - $15 [inflatable butt plug](https://www.amazon.com/Inflatable-Expandable-Stimulator-Beginners-Detachable/dp/B0DSPKVPM1)
 - $20 [battery, charger, and connectors](https://www.amazon.com/dp/B08XZM3NG3)
-- 3D printed case (wip)
 
 ### Small DIY with all the features (WIP)
 - $20 [ESP32-C6 with integrated screen](https://www.amazon.com/dp/B0DHTMYTCY)

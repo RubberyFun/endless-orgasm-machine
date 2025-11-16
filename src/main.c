@@ -100,6 +100,7 @@ static void main_task(void* args) {
     for (;;) {
         loop_task(NULL);
         orgasm_control_tick();
+        eom_hal_led_tick();
         //send_output1();
         vTaskDelay(1);
     }
@@ -165,8 +166,6 @@ void app_main() {
     spiffs_init();
     config_init();
     eom_hal_led_init();
-    eom_hal_set_rgb_color(&rgb_blue);  // Blue = Starting up
-    //eom
     orgasm_control_init();
 
     if (MOTOR1_ENABLED || MOTOR2_ENABLED) {

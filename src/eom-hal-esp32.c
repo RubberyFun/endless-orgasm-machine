@@ -164,28 +164,45 @@ void eom_hal_set_led_mono(uint8_t on) {
     }
 }
 
-void eom_hal_set_rgb(uint8_t r, uint8_t g, uint8_t b) {
-    // Check if flash state needs to toggle
+void eom_hal_led_task(void *pvParameter) {
+    while (1) {
+        eom_hal_led_tick();
+        vTaskDelay(10 / portTICK_PERIOD_MS); //check every 10ms
+    }
+}
+
+void eom_hal_led_tick(void) {
     if (is_flashing) {
         unsigned long current_time = esp_timer_get_time() / 1000UL;
         if (current_time - last_flash >= flash_interval) {
             flash_on = !flash_on;
             last_flash = current_time;
+             if (LED_TYPE == LED_TYPE_MONO) {
+                eom_hal_set_led_mono(flash_on);
+            } else if (LED_TYPE == LED_TYPE_WS2812) {
+                eom_hal_set_rgb(led_color.r, led_color.g, led_color.b);
+            }
         }
     }
+}
+
+void eom_hal_set_rgb(uint8_t r, uint8_t g, uint8_t b) {
     
     // Skip update only if color unchanged AND not flashing
-    if (!is_flashing && led_color.r == r && led_color.g == g && led_color.b == b) {
+    if ((is_flashing && !flash_on && led_color.r == 0 && led_color.g == 0 && led_color.b == 0) 
+        || (led_color.r == r && led_color.g == g && led_color.b == b)
+    ) {
         return; //no change
     }
-    
-    if (LED_TYPE == LED_TYPE_MONO) {
-        if (r > 250 && (!is_flashing || flash_on)) {  //using red value as on/off
-            eom_hal_set_led_mono(1);
-        } else {
-            eom_hal_set_led_mono(0);
-        }
-    } else if (LED_TYPE == LED_TYPE_WS2812) {
+
+    // if (LED_TYPE == LED_TYPE_MONO) {
+    //     if (r > 250 && (!is_flashing || flash_on)) {  //using red value as on/off
+    //         eom_hal_set_led_mono(1);
+    //     } else {
+    //         eom_hal_set_led_mono(0);
+    //     }
+    // } else 
+    if (LED_TYPE == LED_TYPE_WS2812) {
 
         if (led_strip == NULL) {
             ESP_LOGW(TAG, "LED strip not initialized");
@@ -194,8 +211,14 @@ void eom_hal_set_rgb(uint8_t r, uint8_t g, uint8_t b) {
         esp_err_t err = ESP_OK;
         if (!is_flashing || flash_on) {
             err = led_strip_set_pixel(led_strip, 0, r, g, b);
+                led_color.r = r;
+                led_color.g = g;
+                led_color.b = b;
         } else {
             err = led_strip_set_pixel(led_strip, 0, 0, 0, 0);
+            led_color.r = 0;
+            led_color.g = 0;
+            led_color.b = 0;
         }
         if (err != ESP_OK) {
             ESP_LOGE(TAG, "led_strip_set_pixel failed: %s", esp_err_to_name(err));
@@ -208,9 +231,6 @@ void eom_hal_set_rgb(uint8_t r, uint8_t g, uint8_t b) {
         }
         ESP_LOGD(TAG, "LED RGB set to R:%d G:%d B:%d", r, g, b);
     }
-    led_color.r = r;
-    led_color.g = g;
-    led_color.b = b;
 }
 void eom_hal_set_rgb_color(RGBColor* color) {
     eom_hal_set_rgb(color->r, color->g, color->b);
@@ -220,16 +240,26 @@ void eom_hal_set_led_flashing(uint8_t flashing) {
     is_flashing = flashing;
 }
 
+void eom_hal_set_led_flash_interval(uint16_t interval_ms) {
+    ESP_LOGW(TAG, "LED flash set to %d", interval_ms);
+    flash_interval = interval_ms;
+}
+
 void eom_hal_led_init(void)
 {
     gpio_reset_pin(LED_GPIO);
     gpio_set_direction(LED_GPIO, GPIO_MODE_OUTPUT);
     if (LED_TYPE == LED_TYPE_MONO) {
+        eom_hal_set_rgb_color(&rgb_white);
+        eom_hal_set_led_flashing(1);
+        eom_hal_set_led_flash_interval(2000);
         return;
     } else if (LED_TYPE == LED_TYPE_WS2812) {
         led_strip = configure_led_2812();
-
+        eom_hal_set_rgb_color(&rgb_blue);  // Blue = Starting up
     }
+    ESP_LOGI(TAG, "Configured LED init type %d on GPIO %d", LED_TYPE, LED_GPIO);
+
 }
 
 led_strip_handle_t configure_led_2812(void)
@@ -237,7 +267,7 @@ led_strip_handle_t configure_led_2812(void)
     led_strip_config_t strip_config = {
         .strip_gpio_num = LED_GPIO,   // The GPIO that connected to the LED strip's data line
         .max_leds = LED_NUM,        // The number of LEDs in the strip,
-        .color_component_format = LED_STRIP_COLOR_COMPONENT_FMT_RGB, // Color format of your LED strip
+        .color_component_format = LED_STRIP_COLOR_COMPONENT_FMT_GRB, // Color format of your LED strip
         .led_model = LED_MODEL_WS2811,            // LED strip model
         .flags.invert_out = false,                // whether to invert the output signal
     };
@@ -260,7 +290,6 @@ led_strip_handle_t configure_led_2812(void)
     //ESP_ERROR_CHECK(led_strip_new_spi_device(&strip_config, &spi_config, &led_strip));
     ESP_ERROR_CHECK(led_strip_new_rmt_device(&strip_config, &rmt_config, &led_strip));
 
-    ESP_LOGI(TAG, "LED strip 2812 init type %d on GPIO %d", LED_TYPE, LED_GPIO);
     return led_strip;
 }
 
