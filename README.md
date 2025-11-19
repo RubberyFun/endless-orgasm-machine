@@ -91,6 +91,21 @@ This is a fork of that project with a different set of goals.  The main goal is 
 
 This project was first vastly simplified then expanded with compatibility in mind.  You can try it using almost any modern ESP32 device with no additional customization.  You will need to connect a pressure sensor and inflatable buttplug to make it functional, but that's it.  It's meant to be operated wirelessly rather than through the additional hardware of a screen, knob, LEDs, network jack, etc.
 
+Some notable differences are:
+- Runs on nearly any ESP32 board!  DIY friendly
+- Connects through bluetooth low energy
+- Orgasm mode available over UI! (denies orgasms until timer runs out)
+- Maximum denial count, so you get to finish after X number of edges
+- UI hosted as PWA or on device... and is phone friendly
+- defaults to endless orgasm denial in ramp-stop mode
+- smaller build size, fits in your butt
+- SD card requirement removed
+- menu system removed
+- console system removed
+- action manager system removed
+- hardwire networked device support removed 
+- edge times are in seconds
+
 
 ### Customization suggestions 
 - You can use [Xtoys.app](https://xtoys.app) as a control panel to ramp up any number of vibrators, strokers, or e-stim units in sync with the EOM over bluetooth.  See [this Xtoys layout for an example](https://xtoys.app/layouts/-OcwSDDWBei-Bg4xwe5o)
@@ -106,41 +121,26 @@ This project was first vastly simplified then expanded with compatibility in min
 
 
 ### To-do priority
-- ability to connect directly to Lovense vibes, etc. from GUI
-- do canvas drawing to offscreen element for efficiency
-- audio buzzer for cooldown!
-- add a config save button so setting changes aren't immediately permanent
-- LED options.. (Blink until connected, rgb stuff?)
-- bluetooth battery level
-- finish integrated screen support / ip display
+- connect to OSSM and DG Labs Coyote
 - add build walkthrough to docs and more examples, pinouts and schematics
+- audio buzzer for cooldown!
+- add a config save button so setting changes aren't immediately permanent (save toy settings separately?)
+- do canvas drawing to offscreen element for efficiency
+- integrate smoothing filters into pressure readings
 - ui and websockets using same endpoint if possible
+- bug: arousal overflows on hardware side
 - logging from the app
-- bluetooth OTA
 - add X axis on chart (seconds)
 - chart glitch on left side at startup
 - make motor pin selection more intuitive
 - Put some effort into UI styling
+- display toy battery level
+- bluetooth OTA
+- device disconnection
 - disable internal motor control option?
-- arousal overflows on hardware side
+- integrated screen support / ip display
 - Implement patterns?  That's a biggie
 - Running average math seems off
-
-### Notable differences from Edge-o-matic
-(I'll probably remove this section soon...there's more new code than old)
-- Not tied to specific hardware!
-- Runs over bluetooth
-- Orgasm mode available over UI! (denies orgasms until timer runs out)
-- UI hosted as PWA and on device... and is phone friendly
-- communicates with Xtoys via BLE
-- defaults to endless orgasm denial in ramp-stop mode
-- smaller build size
-- SD card requirement removed
-- menu system removed
-- console system removed
-- action manager system removed
-- hardwire networked device support removed 
-- edge times are in seconds
 
 ## Standing on the shoulders of giants
 This is a product of the open source community.  This will always be open source.  Sharing knowledge this way goes back to patent offices, or perhaps cave-man fire.  Sometimes the term can be abused by making things appear open when key information is obfuscated or by taking formerly open repositories offline...that practice of monetizing is also as old as time.  No shame.  Open-source doesn't mean no profiting and I'll try to make some money too. However this particular project intends to focus on information sharing and DIY accessibility as much as functionality.  You should be always be able to build this yourself if you have the free time.  That may not be the most profitable route but I hope the open-source community can elevate this project and make it even more useful than I am capable of.
@@ -150,7 +150,7 @@ This is a product of the open source community.  This will always be open source
 - **Rhobot** with the original [nogasm project](https://github.com/nogasm/nogasm) that started it all
 - **TheElims** Gave feedback and works on [a similar device with much more slick hardware](https://github.com/skier233/SmartAssPlug-development) - 
 - **Skier23** who curates a [repository](https://github.com/Edging-Machines/Edging-Machines) and [discord](https://discord.gg/EvYbZBf) with all information regarding the topic.
-- [Buttplug.io by Qdot](https://buttplug.io/) - Him and his discord team were very helpful even though he was a skeptical dickhead when I told him I was making yet another networked nogasm toy
+- [Buttplug.io by Qdot](https://buttplug.io/) - Powers the connections from the EOM app to other bluetooth toys.  Him and his discord team are very helpful if irritable.
 - **Rudolf**, who came up with the [coiled silicone tube](https://www.thingiverse.com/thing:3543727) as sensor element and even has written a [scientific paper](https://www.degruyter.com/document/doi/10.1515/pjbr-2020-0014/pdf) on that topic.
 
 - **Onwrikbaar** with his bullfrog, who refined the simple [nogasm algorithm](https://github.com/Onwrikbaar/Bullfrog) with a peak summation and decay function.

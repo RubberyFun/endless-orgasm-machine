@@ -194,7 +194,7 @@ static int status_out_chr_access(uint16_t conn_handle, uint16_t attr_handle, str
         if (attr_handle == status_chr_val_handle) {
             
             uint16_t permit_seconds = orgasm_control_get_permit_orgasm_remaining_seconds();
-            uint8_t chr_val[10] = {
+            uint8_t chr_val[13] = {
                 (uint8_t)(orgasm_control_get_last_pressure() >> 4), // Scale from 12-bit (0-4095) to 8-bit (0-255)
                 (uint8_t)(orgasm_control_get_arousal() >> 4),
                 (uint8_t)(orgasm_control_get_arousal_threshold() >> 4),
@@ -204,7 +204,10 @@ static int status_out_chr_access(uint16_t conn_handle, uint16_t attr_handle, str
                 (uint8_t)orgasm_control_get_output_mode(),
                 (uint8_t)Config.vibration_mode,
                 (uint8_t)((permit_seconds >> 8) & 0xFF),  // MSB
-                (uint8_t)(permit_seconds & 0xFF)        // LSB
+                (uint8_t)(permit_seconds & 0xFF),        // LSB
+                (uint8_t)eom_hal_get_rgb_color().r,
+                (uint8_t)eom_hal_get_rgb_color().g,
+                (uint8_t)eom_hal_get_rgb_color().b
             };
 
             rc = os_mbuf_append(ctxt->om, chr_val, sizeof(chr_val));

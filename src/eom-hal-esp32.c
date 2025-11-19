@@ -180,7 +180,7 @@ void eom_hal_led_tick(void) {
              if (LED_TYPE == LED_TYPE_MONO) {
                 eom_hal_set_led_mono(flash_on);
             } else if (LED_TYPE == LED_TYPE_WS2812) {
-                eom_hal_set_rgb(led_color.r, led_color.g, led_color.b);
+                eom_hal_set_rgb(flash_on ? led_color.r : 0, flash_on ? led_color.g : 0, flash_on ? led_color.b : 0);
             }
         }
     }
@@ -245,6 +245,20 @@ void eom_hal_set_led_flash_interval(uint16_t interval_ms) {
     flash_interval = interval_ms;
 }
 
+RGBColor eom_hal_get_rgb_color() {
+    RGBColor color;
+    // if (is_flashing && !flash_on) {  //redundant
+    //     color.r = 0;
+    //     color.g = 0;
+    //     color.b = 0;
+    //     return color;
+    // }
+    color.r = led_color.r;
+    color.g = led_color.g;
+    color.b = led_color.b;
+    return color;
+}
+
 void eom_hal_led_init(void)
 {
     gpio_reset_pin(LED_GPIO);
@@ -267,7 +281,7 @@ led_strip_handle_t configure_led_2812(void)
     led_strip_config_t strip_config = {
         .strip_gpio_num = LED_GPIO,   // The GPIO that connected to the LED strip's data line
         .max_leds = LED_NUM,        // The number of LEDs in the strip,
-        .color_component_format = LED_STRIP_COLOR_COMPONENT_FMT_GRB, // Color format of your LED strip
+        .color_component_format = LED_STRIP_COLOR_COMPONENT_FMT_RGB, // Color format of your LED strip
         .led_model = LED_MODEL_WS2811,            // LED strip model
         .flags.invert_out = false,                // whether to invert the output signal
     };

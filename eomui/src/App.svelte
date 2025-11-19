@@ -2,6 +2,13 @@
   import { onMount } from "svelte";
   import type { Action } from "svelte/action";
     import { run } from "svelte/legacy";
+  import BTLED from "./BTLED.svelte";
+  import DeviceList from "./ButtplugConnector.svelte";
+
+  let btledComponent: any;
+  let BTLEDconnected = $state(false);
+  let deviceComponent: any;
+  let deviceList = $state([]); // List of Buttplug devices
 
   let isSSL = window.location.protocol === "https:";
   let wssUrl = $state(
@@ -23,6 +30,7 @@
   type eomReading = {
     arousal: number;
     cooldown?: number; //s left of denial period
+    color?: string;
     denied?: number;
     localTime?: number;
     millis: number;
@@ -173,7 +181,7 @@
       description: "Maximum number of denials before forcing an orgasm (in orgasm mode). 0 or 100 disables this limit. Also changes the scale of the chart line in other modes.",
     },
     motor_ramp_time_s: {
-      value: 10,
+      value: 30,
       min: 1,
       max: 120,
       label: "Pleasure Ramp Time",
@@ -189,7 +197,7 @@
       description: "Initial intensity of pleasure when stimulation starts.",
     },
     edge_delay: {
-      value: 10,
+      value: 5,
       min: 0,
       max: 60,
       label: "Edge Delay",
@@ -328,7 +336,6 @@
 
   let mainSettings: string[] = [
     "sensitivity_threshold",
-    "sensor_sensitivity",
     "motor_ramp_time_s",
     "edge_delay",
     "chart_window_s",
@@ -338,6 +345,7 @@
     //"wifi_on",
     "max_denied",
     "max_additional_delay",
+    "sensor_sensitivity",
     "max_pleasure",
     "mid_threshold",
     "initial_pleasure",
@@ -566,6 +574,8 @@
         ctx.stroke();
         ctx.beginPath();
         ctx.moveTo(xScale(i), yScale(getNumericValue(r, lineType)));
+
+        //todo: a vertical line to indicate when an edge event occurred
       });
     }
   }
@@ -818,7 +828,7 @@
         "Current readings:",
         $state.snapshot(readings)[$state.snapshot(readings).length - 1],
       );
-    }, 1000); // Log every 30 seconds
+    }, 30000); // Log every 30 seconds
   });
 
   function handleConnect() {
@@ -934,11 +944,48 @@
                       runMode: runModes[data[6]] ?? "ENDLESS",
                       pleasureMode: data[7],
                       permit: data[8] * 255 + (data[9] ?? 0),
+                      color: String(data[10]) + String(data[11]) + String(data[12]),
                       millis: Date.now(),
                       localTime: Date.now(),
                     };
                     readings.push(newReading);
-                    while (
+
+
+                    //it is long past time to refactor all of this
+                    if (BTLEDconnected && btledComponent) {
+                      const r = Number(data[10]);
+                      const g = Number(data[11]);
+                      const b = Number(data[12]);
+                      btledComponent.writeRGB(r, g, b).catch((err: any) => console.error('Failed to write RGB:', err));
+                    }
+
+                    deviceList.forEach((device: any) => {
+                      const deviceSlider = document.getElementById(`${device.Name.replaceAll(" ","-")}-vibrate`) as HTMLInputElement; //vibrate only for now
+                      //console.log('Updating device control for', device.Name, device, deviceSlider);
+                      if (device.mode != "manual") {
+                        let value = 0;
+                        switch (device.mode) {
+                          case "arousal":
+                            value = newReading.arousal / 16;
+                            break;
+                          case "pressure":
+                            value = newReading.pressure / 16;
+                            break;
+                          case "denied":
+                            value = (newReading.denied ?? 0) / settings.max_denied.value;
+                            break;
+                          default:
+                            value = newReading.pleasure ?? 0;
+                            break;
+                        }
+                        if (deviceSlider) {
+                          deviceSlider.value = String(Math.round(value * 255));
+                        }
+                        deviceComponent?.handleVibrateChange(device, value / 255.0);
+                      }
+                  });
+
+                  while (
                       readings.length > 0 && (Date.now() - (readings[0].localTime ?? 0) > settings.chart_window_s.value * 1000)  
                     ) {
                       //the first reading is older than chartTime seconds
@@ -1435,7 +1482,7 @@
               style="background-color: #FF7FFF; color: black; border-color: #FFBFFF;"
               title="Reset denied orgasms count"
             >
-              Reset Denial Count
+              Reset Denied
             </button>
           </div>
 
@@ -1612,7 +1659,7 @@
 >
   <div style="padding: 0; margin-top: 0;">
     <button
-      style="float:right; font-size: 1.5em; background: none; border: none; cursor: pointer;"
+      style="color: red; float:right; padding: 0 .1em 0 .1em; font-size: 3em; background: #555; cursor: pointer; line-height: .75em; display: flex; align-items: center; justify-content: center;"
       aria-label="Close settings"
       onclick={() => settingsDialog.close()}
     >
@@ -1635,14 +1682,15 @@
 >
   <div style="padding: 0; margin-top: 0;">
     <button
-      style="float:right; font-size: 1.5em; background: none; border: none; cursor: pointer;"
+      style="color: red; float:right; padding: 0 .1em 0 .1em; font-size: 3em; background: #555; cursor: pointer; line-height: .75em; display: flex; align-items: center; justify-content: center;"
       aria-label="Close settings"
       onclick={() => toysDialog.close()}
     >
       &times;
     </button>
-    <h2>Connect to bluetooth toys</h2>
+    <h2>Connect to bluetooth toys <span style="font-size: small;">(WIP)</span></h2>
     <hr />
-    <p>Feature coming soon.  Pleasure level will be transmitted to lights, vibrators, strokers, and e-stim units</p>
+    <DeviceList bind:this={deviceComponent} bind:deviceList />
+    <BTLED bind:this={btledComponent} bind:BTLEDconnected />
   </div>
 </dialog>

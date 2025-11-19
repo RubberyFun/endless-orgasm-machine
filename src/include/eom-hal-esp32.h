@@ -41,6 +41,7 @@ void eom_hal_led_init(void);
 void eom_hal_set_led_flash_interval(uint16_t interval_ms);
 void eom_hal_led_tick(void);
 void eom_hal_led_task(void *pvParameter);
+RGBColor eom_hal_get_rgb_color();
 led_strip_handle_t configure_led_2812(void);
 RGBColor calculate_fade_color(RGBColor color_start, RGBColor color_end, float factor);
 extern RGBColor led_color;

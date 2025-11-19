@@ -1,0 +1,154 @@
+diff --git a/node_modules/buttplug/dist/main/src/client/ButtplugClientDevice.js b/node_modules/buttplug/dist/main/src/client/ButtplugClientDevice.js
+index ed6116d..bd00489 100644
+--- a/node_modules/buttplug/dist/main/src/client/ButtplugClientDevice.js
++++ b/node_modules/buttplug/dist/main/src/client/ButtplugClientDevice.js
+@@ -106,16 +106,16 @@ class ButtplugClientDevice extends events_1.EventEmitter {
+     }
+     SendVibrateCmd(aSpeed) {
+         return __awaiter(this, void 0, void 0, function* () {
+-            this.CheckAllowedMessageType(Messages.VibrateCmd.name);
++            this.CheckAllowedMessageType("VibrateCmd");
+             let msg;
+             if (typeof (aSpeed) === "number") {
+                 // We can skip the check here since we're building the command array ourselves.
+-                const features = this.MessageAttributes(Messages.VibrateCmd.name).FeatureCount;
++                const features = this.MessageAttributes("VibrateCmd").FeatureCount;
+                 msg = Messages.VibrateCmd.Create(this._index, new Array(features).fill(aSpeed));
+             }
+             else if (Array.isArray(aSpeed)) {
+                 msg = Messages.VibrateCmd.Create(this._index, aSpeed);
+-                this.CheckGenericSubcommandList(Messages.SpeedSubcommand.name, msg.Speeds, this.MessageAttributes(Messages.VibrateCmd.name).FeatureCount);
++                this.CheckGenericSubcommandList("SpeedSubcommand", msg.Speeds, this.MessageAttributes("VibrateCmd").FeatureCount);
+             }
+             else {
+                 throw new Exceptions_1.ButtplugDeviceException("SendVibrateCmd can only take numbers or arrays of numbers.");
+@@ -125,16 +125,16 @@ class ButtplugClientDevice extends events_1.EventEmitter {
+     }
+     SendRotateCmd(aValues, aClockwise) {
+         return __awaiter(this, void 0, void 0, function* () {
+-            this.CheckAllowedMessageType(Messages.RotateCmd.name);
++            this.CheckAllowedMessageType("RotateCmd");
+             let msg;
+             if (typeof (aValues) === "number") {
+                 // We can skip the check here since we're building the command array ourselves.
+-                const features = this.MessageAttributes(Messages.RotateCmd.name).FeatureCount;
++                const features = this.MessageAttributes("RotateCmd").FeatureCount;
+                 msg = Messages.RotateCmd.Create(this._index, new Array(features).fill([aValues, aClockwise]));
+             }
+             else if (Array.isArray(aValues)) {
+                 msg = Messages.RotateCmd.Create(this._index, aValues);
+-                this.CheckGenericSubcommandList(Messages.SpeedSubcommand.name, msg.Rotations, this.MessageAttributes(Messages.RotateCmd.name).FeatureCount);
++                this.CheckGenericSubcommandList("SpeedSubcommand", msg.Rotations, this.MessageAttributes("RotateCmd").FeatureCount);
+             }
+             else {
+                 throw new Exceptions_1.ButtplugDeviceException("SendRotateCmd can only take a number and boolean, or an array of number/boolean tuples");
+@@ -144,16 +144,16 @@ class ButtplugClientDevice extends events_1.EventEmitter {
+     }
+     SendLinearCmd(aValues, aDuration) {
+         return __awaiter(this, void 0, void 0, function* () {
+-            this.CheckAllowedMessageType(Messages.LinearCmd.name);
++            this.CheckAllowedMessageType("LinearCmd");
+             let msg;
+             if (typeof (aValues) === "number") {
+                 // We can skip the check here since we're building the command array ourselves.
+-                const features = this.MessageAttributes(Messages.LinearCmd.name).FeatureCount;
++                const features = this.MessageAttributes("LinearCmd").FeatureCount;
+                 msg = Messages.LinearCmd.Create(this._index, new Array(features).fill([aValues, aDuration]));
+             }
+             else if (Array.isArray(aValues)) {
+                 msg = Messages.LinearCmd.Create(this._index, aValues);
+-                this.CheckGenericSubcommandList(Messages.SpeedSubcommand.name, msg.Vectors, this.MessageAttributes(Messages.LinearCmd.name).FeatureCount);
++                this.CheckGenericSubcommandList("SpeedSubcommand", msg.Vectors, this.MessageAttributes("LinearCmd").FeatureCount);
+             }
+             else {
+                 throw new Exceptions_1.ButtplugDeviceException("SendLinearCmd can only take a number and number, or an array of number/number tuples");
+@@ -163,32 +163,32 @@ class ButtplugClientDevice extends events_1.EventEmitter {
+     }
+     SendFleshlightLaunchFW12Cmd(aSpeed, aPosition) {
+         return __awaiter(this, void 0, void 0, function* () {
+-            this.CheckAllowedMessageType(Messages.FleshlightLaunchFW12Cmd.name);
++            this.CheckAllowedMessageType("FleshlightLaunchFW12Cmd");
+             yield this.SendMessageAsync(new Messages.FleshlightLaunchFW12Cmd(aSpeed, aPosition, this._index));
+         });
+     }
+     SendLovenseCmd(aDeviceCmd) {
+         return __awaiter(this, void 0, void 0, function* () {
+-            this.CheckAllowedMessageType(Messages.LovenseCmd.name);
++            this.CheckAllowedMessageType("LovenseCmd");
+             yield this.SendMessageAsync(new Messages.LovenseCmd(aDeviceCmd, this._index));
+         });
+     }
+     SendVorzeA10CycloneCmd(aSpeed, aClockwise) {
+         return __awaiter(this, void 0, void 0, function* () {
+-            this.CheckAllowedMessageType(Messages.VorzeA10CycloneCmd.name);
++            this.CheckAllowedMessageType("VorzeA10CycloneCmd");
+             yield this.SendMessageAsync(new Messages.VorzeA10CycloneCmd(aSpeed, aClockwise, this._index));
+         });
+     }
+     SendStopDeviceCmd() {
+         return __awaiter(this, void 0, void 0, function* () {
+             // Every message should support this, but it doesn't hurt to check
+-            this.CheckAllowedMessageType(Messages.StopDeviceCmd.name);
++            this.CheckAllowedMessageType("StopDeviceCmd");
+             yield this.SendMessageAsync(new Messages.StopDeviceCmd(this._index));
+         });
+     }
+     SendKiirooCmd(aPosition) {
+         return __awaiter(this, void 0, void 0, function* () {
+-            this.CheckAllowedMessageType(Messages.KiirooCmd.name);
++            this.CheckAllowedMessageType("KiirooCmd");
+             yield this.SendMessageAsync(new Messages.KiirooCmd(aPosition, this._index));
+         });
+     }
+diff --git a/node_modules/buttplug/dist/main/src/client/Client.js b/node_modules/buttplug/dist/main/src/client/Client.js
+index 06f2963..fd49b5f 100644
+--- a/node_modules/buttplug/dist/main/src/client/Client.js
++++ b/node_modules/buttplug/dist/main/src/client/Client.js
+@@ -196,7 +196,7 @@ class ButtplugClient extends events_1.EventEmitter {
+             if (dev === undefined) {
+                 throw Exceptions_1.ButtplugException.LogAndError(Exceptions_1.ButtplugDeviceException, this._logger, `Device ${aDevice.Index} not available.`);
+             }
+-            if (dev.AllowedMessages.indexOf(aDeviceMsg.Type.name) === -1) {
++            if (dev.AllowedMessages.indexOf(aDeviceMsg.Type.name.replace("_","")) === -1) {
+                 throw Exceptions_1.ButtplugException.LogAndError(Exceptions_1.ButtplugDeviceException, this._logger, `Device ${aDevice.Name} does not accept message type ${aDeviceMsg.Type}.`);
+             }
+             aDeviceMsg.DeviceIndex = aDevice.Index;
+diff --git a/node_modules/buttplug/dist/main/src/core/Messages.js b/node_modules/buttplug/dist/main/src/core/Messages.js
+index 4af8f3d..812779a 100644
+--- a/node_modules/buttplug/dist/main/src/core/Messages.js
++++ b/node_modules/buttplug/dist/main/src/core/Messages.js
+@@ -49,7 +49,7 @@ class ButtplugMessage {
+     }
+     toProtocolFormat() {
+         const jsonObj = {};
+-        jsonObj[this.Type.name] = class_transformer_1.classToPlain(this);
++        jsonObj[this.Type.name.replace("_","")] = class_transformer_1.classToPlain(this);
+         return jsonObj;
+     }
+ }
+diff --git a/node_modules/buttplug/dist/web/buttplug.js b/node_modules/buttplug/dist/web/buttplug.js
+index 6c55d81..d8b8bc3 100644
+--- a/node_modules/buttplug/dist/web/buttplug.js
++++ b/node_modules/buttplug/dist/web/buttplug.js
+@@ -13485,7 +13485,7 @@ class ButtplugMessage {
+     }
+     toProtocolFormat() {
+         const jsonObj = {};
+-        jsonObj[this.Type.name] = class_transformer_1.classToPlain(this);
++        jsonObj[this.Type.name.replace("_","")] = class_transformer_1.classToPlain(this);
+         return jsonObj;
+     }
+ }
+diff --git a/node_modules/buttplug/src/core/Messages.ts b/node_modules/buttplug/src/core/Messages.ts
+index 961966a..cf32b3c 100644
+--- a/node_modules/buttplug/src/core/Messages.ts
++++ b/node_modules/buttplug/src/core/Messages.ts
+@@ -59,7 +59,7 @@ export abstract class ButtplugMessage {
+ 
+   public toProtocolFormat(): object {
+     const jsonObj = {};
+-    jsonObj[this.Type.name] = classToPlain(this);
++    jsonObj[this.Type.name.replace("_","")] = classToPlain(this);
+     return jsonObj;
+   }
+ }

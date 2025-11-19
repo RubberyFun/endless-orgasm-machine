@@ -264,12 +264,12 @@ static void orgasm_control_update_pleasure() {
         if (LED_TYPE == LED_TYPE_MONO ) {
             eom_hal_set_led_flash_interval(2000);
         } else {
-            if (isConnected) {
-                eom_hal_set_rgb_color(&rgb_green); // Green when starting
-            } else {
-                eom_hal_set_rgb_color(&rgb_purple); // Purple when starting unconnected
-            }
             eom_hal_set_led_flashing(0);
+        }
+        if (isConnected) {
+            eom_hal_set_rgb_color(&rgb_green); // Green when starting
+        } else {
+            eom_hal_set_rgb_color(&rgb_purple); // Purple when starting unconnected
         }
         ESP_LOGI(TAG, "Starting cycle: %d", orgasm_state.orgasm_count + 1);
     } else {
@@ -437,21 +437,19 @@ void orgasm_control_twitch_detect() {
         arousal_state.cooldown = (Config.edge_delay * 1000) + output_state.random_additional_delay;
         if (LED_TYPE == LED_TYPE_MONO ) {
             eom_hal_set_led_flash_interval(1);
-        } else {
-            eom_hal_set_rgb_color(&rgb_red); // Red over threshold
-            eom_hal_set_led_flashing(1);
         }
+        eom_hal_set_led_flashing(1);
+        eom_hal_set_rgb_color(&rgb_red); // Red over threshold
 
     } else {
         //fade out flash
         if (LED_TYPE == LED_TYPE_MONO ) {
             uint16_t interval = 1000 - ((float)arousal_state.cooldown / (float)((Config.edge_delay * 1000) + output_state.random_additional_delay)) * 1000;
             eom_hal_set_led_flash_interval(interval);
-        } else {
-            RGBColor fadedColor = calculate_fade_color(rgb_off,rgb_red, ((float)arousal_state.cooldown / (float)((Config.edge_delay * 1000) + output_state.random_additional_delay)));
-            eom_hal_set_rgb(fadedColor.r, fadedColor.g, fadedColor.b);
-            //eom_hal_set_led_flashing(0);
         }
+        RGBColor fadedColor = calculate_fade_color(rgb_off,rgb_red, ((float)arousal_state.cooldown / (float)((Config.edge_delay * 1000) + output_state.random_additional_delay)));
+        eom_hal_set_rgb(fadedColor.r, fadedColor.g, fadedColor.b);
+        //eom_hal_set_led_flashing(0);
     }
 }
 
