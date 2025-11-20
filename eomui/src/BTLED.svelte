@@ -38,7 +38,7 @@
   }
   
   let { BTLEDconnected = $bindable(false) }: Props = $props();
-  let BTLEDstatus = $state("Disconnected");
+  let BTLEDstatus = $state("No lights connected");
 
   async function connectBluetooth() {
     try {
@@ -72,7 +72,7 @@
       // Handle disconnect
       BTLEDdevice.addEventListener('gattserverdisconnected', () => {
         BTLEDconnected = false;
-        BTLEDstatus = "Disconnected";
+        BTLEDstatus = "No lights connected";
         BTLEDcharacteristic = null;
       });
 
@@ -91,7 +91,7 @@
     BTLEDdevice = null;
     BTLEDcharacteristic = null;
     BTLEDconnected = false;
-    BTLEDstatus = "Disconnected";
+    BTLEDstatus = "No lights connected";
   }
 
   export async function writeRGB(r: number, g: number, b: number) {
@@ -119,11 +119,10 @@
 
 <div class="bluetooth-led-control">
   <div>
-    
     <button onclick={() => BTLEDconnected ? disconnect() : connectBluetooth()}>
       {BTLEDconnected ? 'Disconnect' : 'Connect to a light'}
     </button>
-    <span class="bluetooth-led-status" class:BTLEDconnected>{BTLEDstatus}</span>
+    <span class={"bluetooth-led-status" + (BTLEDconnected ? ' connected' : '')}>{BTLEDstatus}</span>
   </div>
   {#if !BTLEDconnected}
     <p style="font-size: small;">Currently this only supports off-brand lights using the LotusLampX app <a target="_blank" href="https://www.amazon.com/dp/B0CCBH8R6K">like this strip.</a></p>

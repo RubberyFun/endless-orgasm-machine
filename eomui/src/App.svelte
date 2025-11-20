@@ -845,10 +845,10 @@
   }
 
   function onDisconnected(event: any) {
-    const device = event.target;
+    const eomDevice = event.target;
     mainSend = null;
     btDevice = null;
-    console.log(`Device ${device.name} is disconnected.`);
+    console.log(`Device ${eomDevice.name} is disconnected.`);
     isBtConnected = false;
   }
 
@@ -914,11 +914,11 @@
           namePrefix: 'Libotoy',
         }]
       })
-        .then((device: any) => {
-          console.log('Connecting to device:', device);
-          device.addEventListener('gattserverdisconnected', onDisconnected);
-          btDevice = device;
-          device.gatt.connect()
+        .then((eomDevice: any) => {
+          console.log('Connecting to device:', eomDevice);
+          eomDevice.addEventListener('gattserverdisconnected', onDisconnected);
+          btDevice = eomDevice;
+          eomDevice.gatt.connect()
             .then((server: any) => {
               lastConnection = "bt";
               console.log('Connected to GATT server:', server);                      
@@ -960,8 +960,7 @@
                     }
 
                     deviceList.forEach((device: any) => {
-                      const deviceSlider = document.getElementById(`${device.Name.replaceAll(" ","-")}-vibrate`) as HTMLInputElement; //vibrate only for now
-                      //console.log('Updating device control for', device.Name, device, deviceSlider);
+                      const deviceSlider = document.getElementById(`device-${device.index}-vibrate`) as HTMLInputElement; //vibrate only for now
                       if (device.mode != "manual") {
                         let value = 0;
                         switch (device.mode) {
