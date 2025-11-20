@@ -213,9 +213,9 @@
       description: "A random amount of extra seconds to add to the wait time before resuming after an edge detection.",
     },
     chart_window_s: {
-      value: 5,
+      value: 1,  //todo: redner chart offscreen to better support older phones/slow processors
       min: 1,
-      max: 120,  //implement logging for longer windows
+      max: 120,  //todo: implement logging for longer windows
       label: "Chart Window",
       type: "seconds",
       description: "The number of seconds to display in the chart history.  Higher numbers can cause sluggish behavior on slower devices.",

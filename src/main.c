@@ -173,7 +173,7 @@ void app_main() {
     }
 
 
-    printf("Lamystere presents the Endless Orgasm Machine\n");
+    printf("Claus Macher presents the Endless Orgasm Machine\n");
     printf("Version: %s\n", EOM_VERSION);
 
     //Post-Update Diagnostics
