@@ -15,6 +15,20 @@ Using an inflatable butt plug to detect pressure changes indicative of pelvic fl
 
 Having to wait for it while being right at the edge makes it more intense!  Trying to resist getting close is a turn-on for some.  When you're ready to end the edging you can use "Control: Orgasm" to allow you to finish after a chosen number of minutes or near-orgasms... if you've had enough simply set it to "Control: Manual" and take care of things manually.  It can also be used after orgasms to determine exactly when the refractory period has subsided enough to begin the next round of pleasuring. 
 
+
+## Web UI
+
+[The UI is posted at https://rubberyfun.github.io/endless-orgasm-machine/eomui/public](https://rubberyfun.github.io/endless-orgasm-machine/eomui/public) and can be installed on your Android or PC as a PWA app for offline use. 
+
+This is what the app view looks like:
+(the purple icon switches between chart mode and realtime mode)
+![Screenshot](doc/Screenshot3.png)
+
+For legacy purposes the UI is also on the ESP32 itself and can be found by visiting the ```/ui``` endpoint at the IP address of your device.  You can watch the serial output to determine the IP.  Due to space limitations the embedded version can't connect to other toys.  It's basically for monitoring the websocket output.
+
+Example: If you join the EOM WiFi access point the IP will be: ```192.168.4.1``` you should visit ```http://192.168.4.1/ui```  It will automatically open a connection to the websocket endpoint at ```http://192.168.4.1/```.
+
+
 ![Screenshot](doc/Screenshot.png) 
 
 ### So how do I get one
@@ -36,19 +50,6 @@ If you go with an inflatable plug you're on your own...There are not yet any fil
 - Under ```PlatformIO -> Project Tasks -> esp32dev -> General``` choose ```Build``` then eventually ```Upload and Monitor```
 - Watch for your device's IP address to be displayed in the monitor window 
 (In access point mode it is 192.168.4.1)
-
-## Web UI
-
-[The UI](eomui/README.md) is posted at https://rubberyfun.github.io/endless-orgasm-machine/eomui/public and can be installed on your Android or PC  as a PWA app for offline use. 
-
-This is what the app view looks like:
-(the purple icon switches between chart mode and realtime mode)
-![Screenshot](doc/Screenshot3.png)
-
-For legacy purposes [The UI](eomui/README.md) is also on the ESP32 itself and can be found by visiting the ```/ui``` endpoint at the IP address of your device.  You can watch the serial output to determine the IP.  Due to space limitations this version can't connect to other toys.  It's basically for monitoring the websocket output.
-
-Example: If you join the EOM WiFi access point the IP will be: ```192.168.4.1``` you should visit ```http://192.168.4.1/ui```  It will automatically open a connection to the websocket endpoint at ```http://192.168.4.1/```.
-
 
 ![Screenshot](doc/Screenshot2.png)
 
