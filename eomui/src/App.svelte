@@ -960,7 +960,6 @@
                     }
 
                     deviceList.forEach((device: any) => {
-                      const deviceSlider = document.getElementById(`device-${device.index}-vibrate`) as HTMLInputElement; //vibrate only for now
                       if (device.mode != "manual") {
                         let value = 0;
                         switch (device.mode) {
@@ -976,11 +975,13 @@
                           default:
                             value = newReading.pleasure ?? 0;
                             break;
+                          }
+                        if (device.sliderElement) {
+                          if (device.sliderElement.value != String(Math.round(value * 255))) {
+                            device.sliderElement.value = String(Math.round(value * 255));
+                            deviceComponent?.handleDeviceChange(device, value / 255.0);
+                          }
                         }
-                        if (deviceSlider) {
-                          deviceSlider.value = String(Math.round(value * 255));
-                        }
-                        deviceComponent?.handleVibrateChange(device, value / 255.0);
                       }
                   });
 

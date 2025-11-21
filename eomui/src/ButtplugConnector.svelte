@@ -12,6 +12,7 @@
     invert?: boolean;
     min?: number;
     max?: number;
+    sliderElement?: HTMLInputElement;
   }
 
   interface Props {
@@ -25,12 +26,12 @@
   async function initialize_buttplug() {
     client.addListener("deviceadded", (device: ButtplugClientDevice) => {
       console.log(`Device added: ${device.name}`, device);
-      // Initialize custom properties
       const eomClientDevice = device as EOMButtplugClientDevice;
       eomClientDevice.mode = "pleasure";
       eomClientDevice.invert = false;
       eomClientDevice.min = 0;
       eomClientDevice.max = 255;
+      eomClientDevice.sliderElement = undefined;
       deviceList = [...deviceList, eomClientDevice];
     });
 
@@ -52,14 +53,22 @@
     initialize_buttplug().catch(err => console.error(err));
   });
 
-  export function handleVibrateChange(device: EOMButtplugClientDevice, value: number) {
+  export function handleDeviceChange(device: EOMButtplugClientDevice, value: number, type: string | undefined = undefined) {
     const min = (device.min ?? 0) / 255.0;
     const max = (device.max ?? 255) / 255.0;
     let speed = value * (max - min) + min;
     if (device.invert) {  //handles unset value as false
       speed = 1.0 - speed;
     }
-    device.vibrate(speed);
+
+    
+    //console.log(`Setting device ${device.name} (${type ?? "all"}) to speed ${speed} (raw value: ${value}, min: ${min}, max: ${max}, invert: ${device.invert})`);
+    if (type === "oscillate" || (!type && (device.oscillateAttributes && device.oscillateAttributes.length > 0))) {
+      device.oscillate(speed);
+    }
+    if (type === "vibrate" || (!type && (device.vibrateAttributes && device.vibrateAttributes.length > 0))) {
+      device.vibrate(speed);
+    }
   }
 </script>
 
@@ -110,12 +119,13 @@
                 </button>
 
           </div>
-          {#if device.vibrateAttributes && device.vibrateAttributes.length > 0}
+          {#if (device.vibrateAttributes && device.vibrateAttributes.length > 0) || (device.oscillateAttributes && device.oscillateAttributes.length > 0)}
           <div class="device-sliders">
-            <input id={`device-${device.index}-vibrate`} type="range" min="0" max="255" value="0" oninput={(e) => {
+            <!-- svelte-ignore binding_property_non_reactive -->
+            <input id={`device-${device.index}-slider`} type="range" min="0" max="255" value="0" bind:this={device.sliderElement} oninput={(e) => {
               //debounce this
-              handleVibrateChange(device,(parseInt((e.target as HTMLInputElement)?.value ?? "0") / 255.0));
-            }}/>
+                handleDeviceChange(device,(parseInt((e.target as HTMLInputElement)?.value ?? "0") / 255.0));
+              }}/>
             <div class="slider">
                 <div id={`device-${device.index}-range-slider`} class="range-slider"></div>
             </div>

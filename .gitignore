@@ -34,3 +34,11 @@ platformio.vcxproj.filters
 platformio.vcxproj.user
 platformio.log
 dependencies.lock
+
+# Buttplug Build Artifacts
+eomui/buttplug/**
+!eomui/buttplug/buttplug.mjs
+!eomui/buttplug/client/
+!eomui/buttplug/client/ButtplugClientDevice.d.ts
+!eomui/buttplug/wasm/
+!eomui/buttplug/wasm/**
