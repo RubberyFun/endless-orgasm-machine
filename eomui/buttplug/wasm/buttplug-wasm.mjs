@@ -1677,7 +1677,7 @@ let __tla = (async () => {
       return this._connected;
     }
   }, _a._loggingActivated = false, _a.maybeLoadWasm = async () => {
-    V.wasmInstance == null && (V.wasmInstance = await import("./buttplug_wasm-DN8EqlxX.js").then(async (m) => {
+    V.wasmInstance == null && (V.wasmInstance = await import("./buttplug_wasm-CFzvm4H6.js").then(async (m) => {
       await m.__tla;
       return m;
     }));

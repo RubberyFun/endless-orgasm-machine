@@ -15,7 +15,7 @@
 static const char* TAG = "HAL";
 
 uint8_t pressure_ambient = DEFAULT_AMBIENT_RESSURE;
-uint8_t pressure_sensitivity = DEFAULT_PRESSURE_SENSITIVITY;  //this now scales 0-3 corresponding to the native ESP32 ADC attenuation levels
+uint8_t pressure_sensitivity = DEFAULT_PRESSURE_SENSITIVITY;  //this scales 0-3 corresponding to the native ESP32 ADC attenuation levels
 
 adc_oneshot_unit_handle_t adc1_handle;
 adc_oneshot_unit_init_cfg_t adc1_init_cfg = {

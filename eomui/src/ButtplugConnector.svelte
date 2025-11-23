@@ -53,21 +53,45 @@
     initialize_buttplug().catch(err => console.error(err));
   });
 
-  export function handleDeviceChange(device: EOMButtplugClientDevice, value: number, type: string | undefined = undefined) {
+  function getDeviceControls(device: EOMButtplugClientDevice) {
+    const controls: Array<{type: 'vibrate' | 'oscillate' | 'linear', attributes: any[], index: number, descriptor: string}> = [];
+    
+    if (device.vibrateAttributes) {
+      device.vibrateAttributes.forEach((attr, idx) => {
+        controls.push({type: 'vibrate', attributes: device.vibrateAttributes, index: idx, descriptor: attr.FeatureDescriptor || `Vibrate ${idx + 1}`});
+      });
+    }
+    if (device.oscillateAttributes) {
+      device.oscillateAttributes.forEach((attr, idx) => {
+        controls.push({type: 'oscillate', attributes: device.oscillateAttributes, index: idx, descriptor: attr.FeatureDescriptor || `Oscillate ${idx + 1}`});
+      });
+    }
+    if (device.linearAttributes) {
+      device.linearAttributes.forEach((attr, idx) => {
+        controls.push({type: 'linear', attributes: device.linearAttributes, index: idx, descriptor: attr.FeatureDescriptor || `Linear ${idx + 1}`});
+      });
+    }
+    
+    return controls;
+  }
+
+  export function handleDeviceChange(device: EOMButtplugClientDevice, value: number, type: string | undefined = undefined, controlIndex: number) {
     const min = (device.min ?? 0) / 255.0;
     const max = (device.max ?? 255) / 255.0;
-    let speed = value * (max - min) + min;
+    let normalizedValue = value * (max - min) + min;
     if (device.invert) {  //handles unset value as false
-      speed = 1.0 - speed;
+      normalizedValue = 1.0 - normalizedValue;
     }
 
-    
-    //console.log(`Setting device ${device.name} (${type ?? "all"}) to speed ${speed} (raw value: ${value}, min: ${min}, max: ${max}, invert: ${device.invert})`);
+    console.log(`Setting device ${device.name} (${type ?? "all"}) feature ${controlIndex} to normalizedValue ${normalizedValue} (raw value: ${value}, min: ${min}, max: ${max}, invert: ${device.invert})`);
     if (type === "oscillate" || (!type && (device.oscillateAttributes && device.oscillateAttributes.length > 0))) {
-      device.oscillate(speed);
+      device.oscillate(normalizedValue, controlIndex);
     }
     if (type === "vibrate" || (!type && (device.vibrateAttributes && device.vibrateAttributes.length > 0))) {
-      device.vibrate(speed);
+      device.vibrate(normalizedValue);
+    }
+    if (type === "linear" || (!type && (device.linearAttributes && device.linearAttributes.length > 0))) {
+      device.linear(normalizedValue);
     }
   }
 </script>
@@ -119,30 +143,42 @@
                 </button>
 
           </div>
-          {#if (device.vibrateAttributes && device.vibrateAttributes.length > 0) || (device.oscillateAttributes && device.oscillateAttributes.length > 0)}
+          {#if 
+            (device.vibrateAttributes && device.vibrateAttributes.length > 0) || 
+            (device.linearAttributes && device.linearAttributes.length > 0) || 
+            (device.oscillateAttributes && device.oscillateAttributes.length > 0)
+          }
+          {#each getDeviceControls(device) as control, controlIdx}
           <div class="device-sliders">
+            <div style="font-weight: bold; margin-bottom: 5px;">
+              {control.descriptor}
+            </div>
+
             <!-- svelte-ignore binding_property_non_reactive -->
-            <input id={`device-${device.index}-slider`} type="range" min="0" max="255" value="0" bind:this={device.sliderElement} oninput={(e) => {
+            <input id={`device-${device.index}-${control.type}-${control.index}-slider`} type="range" min="0" max="255" value="0" bind:this={device.sliderElement} oninput={(e) => {
               //debounce this
-                handleDeviceChange(device,(parseInt((e.target as HTMLInputElement)?.value ?? "0") / 255.0));
+                handleDeviceChange(device,(parseInt((e.target as HTMLInputElement)?.value ?? "0") / 255.0), control.type, control.index);
               }}/>
             <div class="slider">
-                <div id={`device-${device.index}-range-slider`} class="range-slider"></div>
+                <div id={`device-${device.index}-${control.type}-${control.index}-range-slider`} class="range-slider"></div>
             </div>
 
             <div class="range-input">
-                <input id={`device-${device.index}-min`} type="range" class="min-range" min="0" max="255" value="0" step="1" oninput={(e) => {
+                <input id={`device-${device.index}-${control.type}-${control.index}-min`} type="range" class="min-range" min="0" max="255" value="0" step="1" oninput={(e) => {
                   device.min = parseInt((e.target as HTMLInputElement)?.value ?? "0");
-                  const rangeInput = document.querySelector(`#device-${device.index}-range-slider`) as HTMLInputElement;
+                  const rangeInput = document.querySelector(`#device-${device.index}-${control.type}-${control.index}-range-slider`) as HTMLInputElement;
                   rangeInput.style.left = `${device.min / 255 * 100}%`;
                 }} />
-                <input id={`device-${device.index}-max`} type="range" class="max-range" min="0" max="255" value="255" step="1"  oninput={(e) => {
+                <input id={`device-${device.index}-${control.type}-${control.index}-max`} type="range" class="max-range" min="0" max="255" value="255" step="1"  oninput={(e) => {
                   device.max = parseInt((e.target as HTMLInputElement)?.value ?? "255");
-                  const rangeInput = document.querySelector(`#device-${device.index}-range-slider`) as HTMLInputElement;
+                  const rangeInput = document.querySelector(`#device-${device.index}-${control.type}-${control.index}-range-slider`) as HTMLInputElement;
                   rangeInput.style.right = `${(255 - device.max) / 255 * 100}%`;
                 }} />
             </div>
+
+
           </div>
+          {/each}
           {/if}
         </li>
       {/each}

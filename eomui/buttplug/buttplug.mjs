@@ -8,17 +8,17 @@ var Ht = { exports: {} };
   function n() {
   }
   Object.create && (n.prototype = /* @__PURE__ */ Object.create(null), new n().__proto__ || (t = !1));
-  function o(m, _, l) {
-    this.fn = m, this.context = _, this.once = l || !1;
+  function o(v, _, l) {
+    this.fn = v, this.context = _, this.once = l || !1;
   }
-  function u(m, _, l, w, h) {
+  function u(v, _, l, w, h) {
     if (typeof l != "function")
       throw new TypeError("The listener must be a function");
-    var P = new o(l, w || m, h), I = t ? t + _ : _;
-    return m._events[I] ? m._events[I].fn ? m._events[I] = [m._events[I], P] : m._events[I].push(P) : (m._events[I] = P, m._eventsCount++), m;
+    var P = new o(l, w || v, h), I = t ? t + _ : _;
+    return v._events[I] ? v._events[I].fn ? v._events[I] = [v._events[I], P] : v._events[I].push(P) : (v._events[I] = P, v._eventsCount++), v;
   }
-  function c(m, _) {
-    --m._eventsCount === 0 ? m._events = new n() : delete m._events[_];
+  function c(v, _) {
+    --v._eventsCount === 0 ? v._events = new n() : delete v._events[_];
   }
   function d() {
     this._events = new n(), this._eventsCount = 0;
@@ -312,7 +312,7 @@ var gn = (
         return w.propertyName !== void 0;
       }));
       for (var u = [], c = 0, d = this.getAncestors(t); c < d.length; c++) {
-        var m = d[c], _ = e.get(m);
+        var v = d[c], _ = e.get(v);
         if (_) {
           var l = Array.from(_.values()).filter(function(w) {
             return w.propertyName !== void 0;
@@ -329,7 +329,7 @@ var gn = (
           return u;
       }
       for (var c = 0, d = this.getAncestors(t); c < d.length; c++) {
-        var m = d[c], _ = e.get(m);
+        var v = d[c], _ = e.get(v);
         if (_) {
           var l = _.get(n);
           if (l)
@@ -339,8 +339,8 @@ var gn = (
     }, s.prototype.findMetadatas = function(e, t, n) {
       var o = e.get(t), u;
       o && (u = o.get(n));
-      for (var c = [], d = 0, m = this.getAncestors(t); d < m.length; d++) {
-        var _ = m[d], l = e.get(_);
+      for (var c = [], d = 0, v = this.getAncestors(t); d < v.length; d++) {
+        var _ = v[d], l = e.get(_);
         l && l.has(n) && c.push.apply(c, l.get(n));
       }
       return c.slice().reverse().concat((u || []).slice().reverse());
@@ -378,7 +378,7 @@ function mn(s) {
   var e = new s();
   return !(e instanceof Set) && !("push" in e) ? [] : e;
 }
-var ae = (
+var ce = (
   /** @class */
   function() {
     function s(e, t) {
@@ -387,7 +387,7 @@ var ae = (
     return s.prototype.transform = function(e, t, n, o, u, c) {
       var d = this;
       if (c === void 0 && (c = 0), Array.isArray(t) || t instanceof Set) {
-        var m = o && this.transformationType === O.PLAIN_TO_CLASS ? mn(o) : [];
+        var v = o && this.transformationType === O.PLAIN_TO_CLASS ? mn(o) : [];
         return t.forEach(function(y, R) {
           var T = e ? e[R] : void 0;
           if (!d.options.enableCircularCheck || !d.isCircular(y)) {
@@ -397,7 +397,7 @@ var ae = (
                 x = n.options.discriminator.subTypes.find(function(V) {
                   return V.name === y[n.options.discriminator.property];
                 });
-                var J = { newObject: m, object: y, property: void 0 }, A = n.typeFunction(J);
+                var J = { newObject: v, object: y, property: void 0 }, A = n.typeFunction(J);
                 x === void 0 ? x = A : x = x.value, n.options.keepDiscriminatorProperty || delete y[n.options.discriminator.property];
               }
               d.transformationType === O.CLASS_TO_CLASS && (x = y.constructor), d.transformationType === O.CLASS_TO_PLAIN && (y[n.options.discriminator.property] = n.options.discriminator.subTypes.find(function(V) {
@@ -406,9 +406,9 @@ var ae = (
             } else
               x = n;
             var U = d.transform(T, y, x, void 0, y instanceof Map, c + 1);
-            m instanceof Set ? m.add(U) : m.push(U);
-          } else d.transformationType === O.CLASS_TO_CLASS && (m instanceof Set ? m.add(y) : m.push(y));
-        }), m;
+            v instanceof Set ? v.add(U) : v.push(U);
+          } else d.transformationType === O.CLASS_TO_CLASS && (v instanceof Set ? v.add(y) : v.push(y));
+        }), v;
       } else {
         if (n === String && !u)
           return t == null ? t : String(t);
@@ -495,14 +495,14 @@ var ae = (
       }
     }, s.prototype.applyCustomTransformations = function(e, t, n, o, u) {
       var c = this, d = z.findTransformMetadatas(t, n, this.transformationType);
-      return this.options.version !== void 0 && (d = d.filter(function(m) {
-        return m.options ? c.checkVersion(m.options.since, m.options.until) : !0;
-      })), this.options.groups && this.options.groups.length ? d = d.filter(function(m) {
-        return m.options ? c.checkGroups(m.options.groups) : !0;
-      }) : d = d.filter(function(m) {
-        return !m.options || !m.options.groups || !m.options.groups.length;
-      }), d.forEach(function(m) {
-        e = m.transformFn({ value: e, key: n, obj: o, type: u, options: c.options });
+      return this.options.version !== void 0 && (d = d.filter(function(v) {
+        return v.options ? c.checkVersion(v.options.since, v.options.until) : !0;
+      })), this.options.groups && this.options.groups.length ? d = d.filter(function(v) {
+        return v.options ? c.checkGroups(v.options.groups) : !0;
+      }) : d = d.filter(function(v) {
+        return !v.options || !v.options.groups || !v.options.groups.length;
+      }), d.forEach(function(v) {
+        e = v.transformFn({ value: e, key: n, obj: o, type: u, options: c.options });
       }), e;
     }, s.prototype.isCircular = function(e) {
       return this.recursionStack.has(e);
@@ -518,8 +518,8 @@ var ae = (
       if ((u === "exposeAll" || n) && (t instanceof Map ? c = Array.from(t.keys()) : c = Object.keys(t)), n)
         return c;
       if (this.options.ignoreDecorators && this.options.excludeExtraneousValues && e) {
-        var d = z.getExposedProperties(e, this.transformationType), m = z.getExcludedProperties(e, this.transformationType);
-        c = Wt(Wt([], d, !0), m, !0);
+        var d = z.getExposedProperties(e, this.transformationType), v = z.getExcludedProperties(e, this.transformationType);
+        c = Wt(Wt([], d, !0), v, !0);
       }
       if (!this.options.ignoreDecorators && e) {
         var d = z.getExposedProperties(e, this.transformationType);
@@ -557,7 +557,7 @@ var ae = (
       }) : !0;
     }, s;
   }()
-), ce = {
+), ue = {
   enableCircularCheck: !1,
   enableImplicitConversion: !1,
   excludeExtraneousValues: !1,
@@ -583,22 +583,22 @@ var ae = (
     function s() {
     }
     return s.prototype.instanceToPlain = function(e, t) {
-      var n = new ae(O.CLASS_TO_PLAIN, Z(Z({}, ce), t));
+      var n = new ce(O.CLASS_TO_PLAIN, Z(Z({}, ue), t));
       return n.transform(void 0, e, void 0, void 0, void 0, void 0);
     }, s.prototype.classToPlainFromExist = function(e, t, n) {
-      var o = new ae(O.CLASS_TO_PLAIN, Z(Z({}, ce), n));
+      var o = new ce(O.CLASS_TO_PLAIN, Z(Z({}, ue), n));
       return o.transform(t, e, void 0, void 0, void 0, void 0);
     }, s.prototype.plainToInstance = function(e, t, n) {
-      var o = new ae(O.PLAIN_TO_CLASS, Z(Z({}, ce), n));
+      var o = new ce(O.PLAIN_TO_CLASS, Z(Z({}, ue), n));
       return o.transform(void 0, t, e, void 0, void 0, void 0);
     }, s.prototype.plainToClassFromExist = function(e, t, n) {
-      var o = new ae(O.PLAIN_TO_CLASS, Z(Z({}, ce), n));
+      var o = new ce(O.PLAIN_TO_CLASS, Z(Z({}, ue), n));
       return o.transform(e, t, void 0, void 0, void 0, void 0);
     }, s.prototype.instanceToInstance = function(e, t) {
-      var n = new ae(O.CLASS_TO_CLASS, Z(Z({}, ce), t));
+      var n = new ce(O.CLASS_TO_CLASS, Z(Z({}, ue), t));
       return n.transform(void 0, e, void 0, void 0, void 0, void 0);
     }, s.prototype.classToClassFromExist = function(e, t, n) {
-      var o = new ae(O.CLASS_TO_CLASS, Z(Z({}, ce), n));
+      var o = new ce(O.CLASS_TO_CLASS, Z(Z({}, ue), n));
       return o.transform(t, e, void 0, void 0, void 0, void 0);
     }, s.prototype.serialize = function(e, t) {
       return JSON.stringify(this.instanceToPlain(e, t));
@@ -649,9 +649,9 @@ var Ut;
   (function(e) {
     var t = typeof globalThis == "object" ? globalThis : typeof Gt == "object" ? Gt : typeof self == "object" ? self : typeof this == "object" ? this : d(), n = o(s);
     typeof t.Reflect < "u" && (n = o(t.Reflect, n)), e(n, t), typeof t.Reflect > "u" && (t.Reflect = s);
-    function o(m, _) {
+    function o(v, _) {
       return function(l, w) {
-        Object.defineProperty(m, l, { configurable: !0, writable: !0, value: w }), _ && _(l, w);
+        Object.defineProperty(v, l, { configurable: !0, writable: !0, value: w }), _ && _(l, w);
       };
     }
     function u() {
@@ -670,11 +670,11 @@ var Ut;
       return u() || c();
     }
   })(function(e, t) {
-    var n = Object.prototype.hasOwnProperty, o = typeof Symbol == "function", u = o && typeof Symbol.toPrimitive < "u" ? Symbol.toPrimitive : "@@toPrimitive", c = o && typeof Symbol.iterator < "u" ? Symbol.iterator : "@@iterator", d = typeof Object.create == "function", m = { __proto__: [] } instanceof Array, _ = !d && !m, l = {
+    var n = Object.prototype.hasOwnProperty, o = typeof Symbol == "function", u = o && typeof Symbol.toPrimitive < "u" ? Symbol.toPrimitive : "@@toPrimitive", c = o && typeof Symbol.iterator < "u" ? Symbol.iterator : "@@iterator", d = typeof Object.create == "function", v = { __proto__: [] } instanceof Array, _ = !d && !v, l = {
       // create an object in dictionary mode (a.k.a. "slow" mode in v8)
       create: d ? function() {
         return Ke(/* @__PURE__ */ Object.create(null));
-      } : m ? function() {
+      } : v ? function() {
         return Ke({ __proto__: null });
       } : function() {
         return Ke({});
@@ -702,9 +702,9 @@ var Ut;
           throw new TypeError();
         if (!$(i))
           throw new TypeError();
-        if (!$(f) && !S(f) && !oe(f))
+        if (!$(f) && !S(f) && !ae(f))
           throw new TypeError();
-        return oe(f) && (f = void 0), a = ee(a), xe(r, i, a, f);
+        return ae(f) && (f = void 0), a = ee(a), xe(r, i, a, f);
       }
     }
     e("decorate", T);
@@ -779,7 +779,7 @@ var Ut;
     function Se(r, i) {
       for (var a = r.length - 1; a >= 0; --a) {
         var f = r[a], b = f(i);
-        if (!S(b) && !oe(b)) {
+        if (!S(b) && !ae(b)) {
           if (!Nt(b))
             throw new TypeError();
           i = b;
@@ -790,7 +790,7 @@ var Ut;
     function xe(r, i, a, f) {
       for (var b = r.length - 1; b >= 0; --b) {
         var D = r[b], F = D(i, a, f);
-        if (!S(F) && !oe(F)) {
+        if (!S(F) && !ae(F)) {
           if (!$(F))
             throw new TypeError();
           f = F;
@@ -803,7 +803,7 @@ var Ut;
       if (f)
         return !0;
       var b = Qe(i);
-      return oe(b) ? !1 : le(r, b, a);
+      return ae(b) ? !1 : le(r, b, a);
     }
     function ne(r, i, a) {
       var f = pe(
@@ -819,7 +819,7 @@ var Ut;
       if (f)
         return Y(r, i, a);
       var b = Qe(i);
-      if (!oe(b))
+      if (!ae(b))
         return N(r, b, a);
     }
     function Y(r, i, a) {
@@ -851,12 +851,12 @@ var Ut;
       if (a.length <= 0)
         return b;
       for (var D = new P(), F = [], C = 0, p = a; C < p.length; C++) {
-        var g = p[C], v = D.has(g);
-        v || (D.add(g), F.push(g));
+        var g = p[C], m = D.has(g);
+        m || (D.add(g), F.push(g));
       }
       for (var M = 0, E = b; M < E.length; M++) {
-        var g = E[M], v = D.has(g);
-        v || (D.add(g), F.push(g));
+        var g = E[M], m = D.has(g);
+        m || (D.add(g), F.push(g));
       }
       return F;
     }
@@ -892,7 +892,7 @@ var Ut;
     function S(r) {
       return r === void 0;
     }
-    function oe(r) {
+    function ae(r) {
       return r === null;
     }
     function Qt(r) {
@@ -1019,7 +1019,7 @@ var Ut;
       var i, a, f, b = new I(), D = {
         registerProvider: F,
         getProvider: p,
-        setProvider: v
+        setProvider: m
       };
       return D;
       function F(M) {
@@ -1073,7 +1073,7 @@ var Ut;
           throw new TypeError();
         return i === M || a === M || !S(f) && f.has(M);
       }
-      function v(M, E, L) {
+      function m(M, E, L) {
         if (!g(L))
           throw new Error("Metadata provider not registered.");
         var j = p(M, E);
@@ -1097,9 +1097,9 @@ var Ut;
     }
     function sn(r) {
       var i = new I(), a = {
-        isProviderFor: function(g, v) {
+        isProviderFor: function(g, m) {
           var M = i.get(g);
-          return S(M) ? !1 : M.has(v);
+          return S(M) ? !1 : M.has(m);
         },
         OrdinaryDefineOwnMetadata: F,
         OrdinaryHasOwnMetadata: b,
@@ -1108,34 +1108,34 @@ var Ut;
         OrdinaryDeleteMetadata: p
       };
       return y.registerProvider(a), a;
-      function f(g, v, M) {
+      function f(g, m, M) {
         var E = i.get(g), L = !1;
         if (S(E)) {
           if (!M)
             return;
           E = new h(), i.set(g, E), L = !0;
         }
-        var j = E.get(v);
+        var j = E.get(m);
         if (S(j)) {
           if (!M)
             return;
-          if (j = new h(), E.set(v, j), !r.setProvider(g, v, a))
-            throw E.delete(v), L && i.delete(g), new Error("Wrong provider for target.");
+          if (j = new h(), E.set(m, j), !r.setProvider(g, m, a))
+            throw E.delete(m), L && i.delete(g), new Error("Wrong provider for target.");
         }
         return j;
       }
-      function b(g, v, M) {
+      function b(g, m, M) {
         var E = f(
-          v,
+          m,
           M,
           /*Create*/
           !1
         );
         return S(E) ? !1 : Rt(E.has(g));
       }
-      function D(g, v, M) {
+      function D(g, m, M) {
         var E = f(
-          v,
+          m,
           M,
           /*Create*/
           !1
@@ -1143,19 +1143,19 @@ var Ut;
         if (!S(E))
           return E.get(g);
       }
-      function F(g, v, M, E) {
+      function F(g, m, M, E) {
         var L = f(
           M,
           E,
           /*Create*/
           !0
         );
-        L.set(g, v);
+        L.set(g, m);
       }
-      function C(g, v) {
+      function C(g, m) {
         var M = [], E = f(
           g,
-          v,
+          m,
           /*Create*/
           !1
         );
@@ -1178,9 +1178,9 @@ var Ut;
           Q++;
         }
       }
-      function p(g, v, M) {
+      function p(g, m, M) {
         var E = f(
-          v,
+          m,
           M,
           /*Create*/
           !1
@@ -1188,7 +1188,7 @@ var Ut;
         if (S(E) || !E.delete(g))
           return !1;
         if (E.size === 0) {
-          var L = i.get(v);
+          var L = i.get(m);
           S(L) || (L.delete(M), L.size === 0 && i.delete(L));
         }
         return !0;
@@ -1197,8 +1197,8 @@ var Ut;
     function on(r) {
       var i = r.defineMetadata, a = r.hasOwnMetadata, f = r.getOwnMetadata, b = r.getOwnMetadataKeys, D = r.deleteMetadata, F = new I(), C = {
         isProviderFor: function(p, g) {
-          var v = F.get(p);
-          return !S(v) && v.has(g) ? !0 : b(p, g).length ? (S(v) && (v = new P(), F.set(p, v)), v.add(g), !0) : !1;
+          var m = F.get(p);
+          return !S(m) && m.has(g) ? !0 : b(p, g).length ? (S(m) && (m = new P(), F.set(p, m)), m.add(g), !0) : !1;
         },
         OrdinaryDefineOwnMetadata: i,
         OrdinaryHasOwnMetadata: a,
@@ -1222,8 +1222,8 @@ var Ut;
       var r = {}, i = [], a = (
         /** @class */
         function() {
-          function C(p, g, v) {
-            this._index = 0, this._keys = p, this._values = g, this._selector = v;
+          function C(p, g, m) {
+            this._index = 0, this._keys = p, this._values = g, this._selector = m;
           }
           return C.prototype["@@iterator"] = function() {
             return this;
@@ -1268,12 +1268,12 @@ var Ut;
             );
             return g >= 0 ? this._values[g] : void 0;
           }, C.prototype.set = function(p, g) {
-            var v = this._find(
+            var m = this._find(
               p,
               /*insert*/
               !0
             );
-            return this._values[v] = g, this;
+            return this._values[m] = g, this;
           }, C.prototype.delete = function(p) {
             var g = this._find(
               p,
@@ -1281,7 +1281,7 @@ var Ut;
               !1
             );
             if (g >= 0) {
-              for (var v = this._keys.length, M = g + 1; M < v; M++)
+              for (var m = this._keys.length, M = g + 1; M < m; M++)
                 this._keys[M - 1] = this._keys[M], this._values[M - 1] = this._values[M];
               return this._keys.length--, this._values.length--, Ye(p, this._cacheKey) && (this._cacheKey = r, this._cacheIndex = -2), !0;
             }
@@ -1301,9 +1301,9 @@ var Ut;
           }, C.prototype._find = function(p, g) {
             if (!Ye(this._cacheKey, p)) {
               this._cacheIndex = -1;
-              for (var v = 0; v < this._keys.length; v++)
-                if (Ye(this._keys[v], p)) {
-                  this._cacheIndex = v;
+              for (var m = 0; m < this._keys.length; m++)
+                if (Ye(this._keys[m], p)) {
+                  this._cacheIndex = m;
                   break;
                 }
             }
@@ -1367,33 +1367,33 @@ var Ut;
             this._key = f();
           }
           return p.prototype.has = function(g) {
-            var v = b(
+            var m = b(
               g,
               /*create*/
               !1
             );
-            return v !== void 0 ? l.has(v, this._key) : !1;
+            return m !== void 0 ? l.has(m, this._key) : !1;
           }, p.prototype.get = function(g) {
-            var v = b(
+            var m = b(
               g,
               /*create*/
               !1
             );
-            return v !== void 0 ? l.get(v, this._key) : void 0;
-          }, p.prototype.set = function(g, v) {
+            return m !== void 0 ? l.get(m, this._key) : void 0;
+          }, p.prototype.set = function(g, m) {
             var M = b(
               g,
               /*create*/
               !0
             );
-            return M[this._key] = v, this;
+            return M[this._key] = m, this;
           }, p.prototype.delete = function(g) {
-            var v = b(
+            var m = b(
               g,
               /*create*/
               !1
             );
-            return v !== void 0 ? delete v[this._key] : !1;
+            return m !== void 0 ? delete m[this._key] : !1;
           }, p.prototype.clear = function() {
             this._key = f();
           }, p;
@@ -1415,8 +1415,8 @@ var Ut;
         return p[a];
       }
       function D(p, g) {
-        for (var v = 0; v < g; ++v)
-          p[v] = Math.random() * 255 | 0;
+        for (var m = 0; m < g; ++m)
+          p[m] = Math.random() * 255 | 0;
         return p;
       }
       function F(p) {
@@ -1429,9 +1429,9 @@ var Ut;
       function C() {
         var p = F(r);
         p[6] = p[6] & 79 | 64, p[8] = p[8] & 191 | 128;
-        for (var g = "", v = 0; v < r; ++v) {
-          var M = p[v];
-          (v === 4 || v === 6 || v === 8) && (g += "-"), M < 16 && (g += "0"), g += M.toString(16).toLowerCase();
+        for (var g = "", m = 0; m < r; ++m) {
+          var M = p[m];
+          (m === 4 || m === 6 || m === 8) && (g += "-"), M < 16 && (g += "0"), g += M.toString(16).toLowerCase();
         }
         return g;
       }
@@ -1456,7 +1456,7 @@ class it {
     (e = this.ScalarCmd) == null || e.forEach((c, d) => c.Index = d), (t = this.RotateCmd) == null || t.forEach((c, d) => c.Index = d), (n = this.LinearCmd) == null || n.forEach((c, d) => c.Index = d), (o = this.SensorReadCmd) == null || o.forEach((c, d) => c.Index = d), (u = this.SensorSubscribeCmd) == null || u.forEach((c, d) => c.Index = d);
   }
 }
-var ue = /* @__PURE__ */ ((s) => (s.Unknown = "Unknown", s.Vibrate = "Vibrate", s.Rotate = "Rotate", s.Oscillate = "Oscillate", s.Constrict = "Constrict", s.Inflate = "Inflate", s.Position = "Position", s))(ue || {}), re = /* @__PURE__ */ ((s) => (s.Unknown = "Unknown", s.Battery = "Battery", s.RSSI = "RSSI", s.Button = "Button", s.Pressure = "Pressure", s))(re || {});
+var ie = /* @__PURE__ */ ((s) => (s.Unknown = "Unknown", s.Vibrate = "Vibrate", s.Rotate = "Rotate", s.Oscillate = "Oscillate", s.Constrict = "Constrict", s.Inflate = "Inflate", s.Position = "Position", s))(ie || {}), re = /* @__PURE__ */ ((s) => (s.Unknown = "Unknown", s.Battery = "Battery", s.RSSI = "RSSI", s.Button = "Button", s.Pressure = "Pressure", s))(re || {});
 class xn {
   constructor(e) {
     this.Index = 0, Object.assign(this, e);
@@ -1727,7 +1727,7 @@ Et.Name = "RawReading";
 let Ue = Et;
 const En = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  ActuatorType: ue,
+  ActuatorType: ie,
   ButtplugDeviceMessage: X,
   ButtplugMessage: K,
   ButtplugSystemMessage: he,
@@ -1845,7 +1845,7 @@ function Yt(s) {
       return e;
   return null;
 }
-function ie(s) {
+function oe(s) {
   return Yt(Object.getPrototypeOf(s).constructor.Name);
 }
 function zt(s) {
@@ -1909,7 +1909,7 @@ class ze extends Ze {
   }
   async sendExpectOk(e) {
     const t = await this.send(e);
-    switch (ie(t)) {
+    switch (oe(t)) {
       case ye:
         return;
       case se:
@@ -1923,51 +1923,49 @@ class ze extends Ze {
   async scalar(e) {
     Array.isArray(e) ? await this.sendExpectOk(new me(e, this.index)) : await this.sendExpectOk(new me([e], this.index));
   }
-  async scalarCommandBuilder(e, t) {
-    var u;
-    const n = (u = this.messageAttributes.ScalarCmd) == null ? void 0 : u.filter(
-      (c) => c.ActuatorType === t
+  async scalarCommandBuilder(e, t, n) {
+    var c;
+    const o = (c = this.messageAttributes.ScalarCmd) == null ? void 0 : c.filter(
+      (d) => d.ActuatorType === t
     );
-    if (!n || n.length === 0)
+    if (!o || o.length === 0)
       throw new G(
         `Device ${this.name} has no ${t} capabilities`
       );
-    const o = [];
+    const u = [];
     if (typeof e == "number")
-      n.forEach(
-        (c) => o.push(new tt(c.Index, e, t))
-      );
+      u.push(new tt(n ?? 0, e, t));
     else if (Array.isArray(e)) {
-      if (e.length > n.length)
+      if (e.length > o.length)
         throw new G(
-          `${e.length} commands send to a device with ${n.length} vibrators`
+          `${e.length} commands send to a device with ${o.length} vibrators`
         );
-      n.forEach((c, d) => {
-        o.push(new tt(c.Index, e[d], t));
+      o.forEach((d, v) => {
+        u.push(new tt(d.Index, e[v], t));
       });
     } else
       throw new G(
         `${t} can only take numbers or arrays of numbers.`
       );
-    await this.scalar(o);
+    await this.scalar(u);
   }
   get vibrateAttributes() {
     var e;
     return ((e = this.messageAttributes.ScalarCmd) == null ? void 0 : e.filter(
-      (t) => t.ActuatorType === ue.Vibrate
+      (t) => t.ActuatorType === ie.Vibrate
     )) ?? [];
   }
   async vibrate(e) {
-    await this.scalarCommandBuilder(e, ue.Vibrate);
+    await this.scalarCommandBuilder(e, ie.Vibrate);
   }
   get oscillateAttributes() {
     var e;
     return ((e = this.messageAttributes.ScalarCmd) == null ? void 0 : e.filter(
-      (t) => t.ActuatorType === ue.Oscillate
+      (t) => t.ActuatorType === ie.Oscillate
     )) ?? [];
   }
-  async oscillate(e) {
-    await this.scalarCommandBuilder(e, ue.Oscillate);
+  async oscillate(e, t) {
+    await this.scalarCommandBuilder(e, ie.Oscillate, t);
   }
   get rotateAttributes() {
     return this.messageAttributes.RotateCmd ?? [];
@@ -1993,21 +1991,25 @@ class ze extends Ze {
     await this.sendExpectOk(o);
   }
   get linearAttributes() {
-    return this.messageAttributes.LinearCmd ?? [];
+    var e;
+    return ((e = this.messageAttributes.ScalarCmd) == null ? void 0 : e.filter(
+      (t) => t.ActuatorType === ie.Position
+    )) ?? [];
   }
   async linear(e, t) {
-    const n = this.messageAttributes.LinearCmd;
+    const n = this.linearAttributes;
     if (!n || n.length === 0)
       throw new G(
         `Device ${this.name} has no Linear capabilities`
       );
     let o;
-    if (typeof e == "number")
+    if (typeof e == "number") {
+      const u = t !== void 0 ? [e, t] : e;
       o = Me.Create(
         this.index,
-        new Array(n.length).fill([e, t])
+        new Array(n.length).fill(u)
       );
-    else if (Array.isArray(e))
+    } else if (Array.isArray(e))
       o = Me.Create(this.index, e);
     else
       throw new G(
@@ -2019,7 +2021,7 @@ class ze extends Ze {
     const n = await this.send(
       new je(this.index, e, t)
     );
-    switch (ie(n)) {
+    switch (oe(n)) {
       case Be:
         return n.Data;
       case se:
@@ -2084,7 +2086,7 @@ class ze extends Ze {
     const o = await this.send(
       new $e(this.index, e, t, n)
     );
-    switch (ie(o)) {
+    switch (oe(o)) {
       case Ue:
         return new Uint8Array(o.Data);
       case se:
@@ -2210,7 +2212,7 @@ class kn extends Ze {
     }, this.parseMessages = (t) => {
       const n = this._sorter.ParseIncomingMessages(t);
       for (const o of n)
-        switch (ie(o)) {
+        switch (oe(o)) {
           case ve: {
             const u = o, c = ze.fromMsg(
               u,
@@ -2239,7 +2241,7 @@ class kn extends Ze {
           Ce
         )
       );
-      switch (ie(t)) {
+      switch (oe(t)) {
         case Ne: {
           const n = t;
           if (this._logger.Info(
@@ -2281,7 +2283,7 @@ class kn extends Ze {
       await this.stopAllDevices(), this._pingTimer !== null && (clearInterval(this._pingTimer), this._pingTimer = null);
     }, this.sendMsgExpectOk = async (t) => {
       const n = await this.sendMessage(t);
-      switch (ie(n)) {
+      switch (oe(n)) {
         case ye:
           return;
         case se:
@@ -2290,7 +2292,7 @@ class kn extends Ze {
           throw H.LogAndError(
             ge,
             this._logger,
-            `Message type ${ie(n).constructor} not handled by SendMsgExpectOk`
+            `Message type ${oe(n).constructor} not handled by SendMsgExpectOk`
           );
       }
     }, this.sendDeviceMessageClosure = async (t, n) => await this.sendDeviceMessage(t, n), this._clientName = e, this._logger.Debug(`ButtplugClient: Client ${e} created.`);
@@ -2388,7 +2390,7 @@ class Dn extends Tn {
   }
 }
 export {
-  ue as ActuatorType,
+  ie as ActuatorType,
   Tn as ButtplugBrowserWebsocketClientConnector,
   kn as ButtplugClient,
   Pn as ButtplugClientConnectorException,
@@ -2447,5 +2449,5 @@ export {
   Pe as StopScanning,
   Xt as VectorSubcommand,
   zt as fromJSON,
-  ie as getMessageClassFromMessage
+  oe as getMessageClassFromMessage
 };
