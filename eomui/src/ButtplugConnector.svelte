@@ -6,8 +6,15 @@
   import { ButtplugWasmClientConnector as IButtplugWasmClientConnector } from "../buttplug/wasm/buttplug-wasm.mjs";
   import { ButtplugClient } from "../buttplug/buttplug.mjs";
 
+
   // Extend the ButtplugClientDevice type with custom properties
-  interface EOMButtplugClientDevice extends ButtplugClientDevice {
+
+  export interface EOMButtplugClientDeviceControl {
+    type: "vibrate" | "oscillate" | "linear";
+    attributes: any[];
+    index: number;
+    descriptor: string;
+    
     mode?: string;
     invert?: boolean;
     min?: number;
@@ -15,6 +22,11 @@
     sliderElement?: HTMLInputElement;
   }
 
+  export interface EOMButtplugClientDevice extends ButtplugClientDevice {
+    controls?: EOMButtplugClientDeviceControl[];
+  }
+
+  
   interface Props {
     deviceList?: EOMButtplugClientDevice[];
   }
@@ -26,13 +38,9 @@
   async function initialize_buttplug() {
     client.addListener("deviceadded", (device: ButtplugClientDevice) => {
       console.log(`Device added: ${device.name}`, device);
-      const eomClientDevice = device as EOMButtplugClientDevice;
-      eomClientDevice.mode = "pleasure";
-      eomClientDevice.invert = false;
-      eomClientDevice.min = 0;
-      eomClientDevice.max = 255;
-      eomClientDevice.sliderElement = undefined;
-      deviceList = [...deviceList, eomClientDevice];
+      let eomDevice = device as EOMButtplugClientDevice;
+      eomDevice.controls = initDeviceControls(eomDevice);
+      deviceList = [...deviceList, eomDevice];
     });
 
 
@@ -53,44 +61,74 @@
     initialize_buttplug().catch(err => console.error(err));
   });
 
-  function getDeviceControls(device: EOMButtplugClientDevice) {
-    const controls: Array<{type: 'vibrate' | 'oscillate' | 'linear', attributes: any[], index: number, descriptor: string}> = [];
+  export function initDeviceControls(device: ButtplugClientDevice): EOMButtplugClientDeviceControl[] {
+    const controls: EOMButtplugClientDeviceControl[] = [];
     
     if (device.vibrateAttributes) {
       device.vibrateAttributes.forEach((attr, idx) => {
-        controls.push({type: 'vibrate', attributes: device.vibrateAttributes, index: idx, descriptor: attr.FeatureDescriptor || `Vibrate ${idx + 1}`});
+        controls.push({
+          type: 'vibrate', 
+          attributes: [], 
+          index: idx, 
+          descriptor: attr.FeatureDescriptor || `Vibrate ${idx + 1}`,
+          mode: idx === 0 ? "pleasure" : "manual",
+          invert: false,
+          min: 0,
+          max: 255,
+          sliderElement: undefined
+        });
       });
     }
     if (device.oscillateAttributes) {
       device.oscillateAttributes.forEach((attr, idx) => {
-        controls.push({type: 'oscillate', attributes: device.oscillateAttributes, index: idx, descriptor: attr.FeatureDescriptor || `Oscillate ${idx + 1}`});
+        controls.push({
+          type: 'oscillate', 
+          attributes: [], 
+          index: idx, 
+          descriptor: attr.FeatureDescriptor || `Oscillate ${idx + 1}`,
+          mode: idx === 0 ? "pleasure" : "manual",
+          invert: false,
+          min: 0,
+          max: 255,
+          sliderElement: undefined
+        });
       });
     }
     if (device.linearAttributes) {
       device.linearAttributes.forEach((attr, idx) => {
-        controls.push({type: 'linear', attributes: device.linearAttributes, index: idx, descriptor: attr.FeatureDescriptor || `Linear ${idx + 1}`});
+        controls.push({
+          type: 'linear', 
+          attributes: [], 
+          index: idx, 
+          descriptor: attr.FeatureDescriptor || `Linear ${idx + 1}`,
+          mode: idx === 0 ? "pleasure" : "manual",
+          invert: false,
+          min: 0,
+          max: 255,
+          sliderElement: undefined
+        });
       });
     }
     
     return controls;
   }
 
-  export function handleDeviceChange(device: EOMButtplugClientDevice, value: number, type: string | undefined = undefined, controlIndex: number) {
-    const min = (device.min ?? 0) / 255.0;
-    const max = (device.max ?? 255) / 255.0;
+  export function handleDeviceChange(device: ButtplugClientDevice, control: EOMButtplugClientDeviceControl, value: number) {
+    const min = (control.min ?? 0) / 255.0;
+    const max = (control.max ?? 255) / 255.0;
     let normalizedValue = value * (max - min) + min;
-    if (device.invert) {  //handles unset value as false
-      normalizedValue = 1.0 - normalizedValue;
+    if (control.invert) {  //handles unset value as false
+      normalizedValue = 1.0 - normalizedValue;  
     }
 
-    console.log(`Setting device ${device.name} (${type ?? "all"}) feature ${controlIndex} to normalizedValue ${normalizedValue} (raw value: ${value}, min: ${min}, max: ${max}, invert: ${device.invert})`);
-    if (type === "oscillate" || (!type && (device.oscillateAttributes && device.oscillateAttributes.length > 0))) {
-      device.oscillate(normalizedValue, controlIndex);
+    console.log(`Setting device ${device.name} (${control.type}) feature ${control.index} to normalizedValue ${normalizedValue} (raw value: ${value}, min: ${min}, max: ${max}, invert: ${control.invert})`);
+    if (control.type === "oscillate") {
+      device.oscillate(normalizedValue, control.index);
     }
-    if (type === "vibrate" || (!type && (device.vibrateAttributes && device.vibrateAttributes.length > 0))) {
+    if (control.type === "vibrate") {
       device.vibrate(normalizedValue);
     }
-    if (type === "linear" || (!type && (device.linearAttributes && device.linearAttributes.length > 0))) {
+    if (control.type === "linear") {
       device.linear(normalizedValue);
     }
   }
@@ -112,35 +150,17 @@
         <li>
           <div style="display: flex;flex-direction: row;justify-content: space-between;">
             <div>{device.name}</div>
-            <div>
-              <select id={device.name.replaceAll(" ","-") + "-mode"} onchange={async (e) => {
-                const mode = (e.target as HTMLSelectElement).value;
-                console.log(`Setting mode for ${device.name.replaceAll(" ","-")} to ${mode}`);
-                device.mode = mode;
-              }}>
-                <option value="pleasure">Connect to Pleasure</option>
-                <option value="arousal">Connect to Arousal</option>
-                <option value="pressure">Connect to Pressure</option>
-                <option value="denials">Connect to Denials</option>
-                <option value="manual">Manual control only</option>
-              </select>
-            </div>
-            <div>
-              <input type="checkbox" id={device.name.replaceAll(" ","-") + "-invert"} checked={device.invert} onchange={async (e) => {
-                device.invert = (e.target as HTMLInputElement).checked;
-              }}/> Invert
-            </div>
-                <button
-                  title="Disconnect toy"
-                  style="color: red; float:right; padding: 0 .25em 0 .25em; font-size: 1.25em; background: #444; cursor: pointer; line-height: .05em; display: flex; align-items: center; justify-content: center;"
-                  aria-label="Close settings"
-                  onclick={async () => {
-                    await device.stop();
-                    deviceList = deviceList.filter(d => d !== device);
-                    }}
-                >
-                  &times;
-                </button>
+            <button
+              title="Disconnect toy"
+              style="color: red; float:right; padding: 0 .25em 0 .25em; font-size: 1.25em; background: #444; cursor: pointer; line-height: .05em; display: flex; align-items: center; justify-content: center;"
+              aria-label="Close settings"
+              onclick={async () => {
+                await device.stop();
+                deviceList = deviceList.filter(d => d !== device);
+                }}
+            >
+              &times;
+            </button>
 
           </div>
           {#if 
@@ -148,31 +168,53 @@
             (device.linearAttributes && device.linearAttributes.length > 0) || 
             (device.oscillateAttributes && device.oscillateAttributes.length > 0)
           }
-          {#each getDeviceControls(device) as control, controlIdx}
+          {#each device.controls as control}
           <div class="device-sliders">
-            <div style="font-weight: bold; margin-bottom: 5px;">
-              {control.descriptor}
+            <div style="display: flex;flex-direction: row;justify-content: space-between;">
+
+              <div style="font-weight: bold; margin-bottom: 5px;">
+                {control.descriptor}
+              </div>
+
+              <div>
+                <select id={device.index + "-" + control.type + "-" + control.index + "-mode"} onchange={async (e) => {
+                  const mode = (e.target as HTMLSelectElement).value;
+                  console.log(`Setting mode for ${device.name} ${control.descriptor} to ${mode}`);
+                  control.mode = mode;
+                }}>
+                  <option value="manual" selected={control.mode === "manual"}>Manual control only</option>
+                  <option value="pleasure" selected={control.mode === "pleasure"}>Connect to Pleasure</option>
+                  <option value="arousal" selected={control.mode === "arousal"}>Connect to Arousal</option>
+                  <option value="pressure" selected={control.mode === "pressure"}>Connect to Pressure</option>
+                  <option value="denied" selected={control.mode === "denied"}>Connect to Denials</option>
+                </select>
+              </div>
+              <div>
+                <input type="checkbox" id={device.index + "-" + control.type + "-" + control.index + "-invert"} checked={control.invert} onchange={async (e) => {
+                  control.invert = (e.target as HTMLInputElement).checked;
+                }}/> Invert
+              </div>
             </div>
 
             <!-- svelte-ignore binding_property_non_reactive -->
-            <input id={`device-${device.index}-${control.type}-${control.index}-slider`} type="range" min="0" max="255" value="0" bind:this={device.sliderElement} oninput={(e) => {
+            <input id={`control-${device.index}-${control.type}-${control.index}-slider`} type="range" min="0" max="255" value="0" bind:this={control.sliderElement} oninput={(e) => {
               //debounce this
-                handleDeviceChange(device,(parseInt((e.target as HTMLInputElement)?.value ?? "0") / 255.0), control.type, control.index);
+                handleDeviceChange(device, control, (parseInt((e.target as HTMLInputElement)?.value ?? "0") / 255.0));
               }}/>
             <div class="slider">
-                <div id={`device-${device.index}-${control.type}-${control.index}-range-slider`} class="range-slider"></div>
+                <div id={`control-${device.index}-${control.type}-${control.index}-range-slider`} class="range-slider"></div>
             </div>
 
             <div class="range-input">
-                <input id={`device-${device.index}-${control.type}-${control.index}-min`} type="range" class="min-range" min="0" max="255" value="0" step="1" oninput={(e) => {
-                  device.min = parseInt((e.target as HTMLInputElement)?.value ?? "0");
-                  const rangeInput = document.querySelector(`#device-${device.index}-${control.type}-${control.index}-range-slider`) as HTMLInputElement;
-                  rangeInput.style.left = `${device.min / 255 * 100}%`;
+                <input id={`control-${device.index}-${control.type}-${control.index}-min`} type="range" class="min-range" min="0" max="255" value="0" step="1" oninput={(e) => {
+                  control.min = parseInt((e.target as HTMLInputElement)?.value ?? "0");
+                  const rangeInput = document.querySelector(`#control-${device.index}-${control.type}-${control.index}-range-slider`) as HTMLInputElement;
+                  rangeInput.style.left = `${control.min / 255 * 100}%`;
                 }} />
-                <input id={`device-${device.index}-${control.type}-${control.index}-max`} type="range" class="max-range" min="0" max="255" value="255" step="1"  oninput={(e) => {
-                  device.max = parseInt((e.target as HTMLInputElement)?.value ?? "255");
-                  const rangeInput = document.querySelector(`#device-${device.index}-${control.type}-${control.index}-range-slider`) as HTMLInputElement;
-                  rangeInput.style.right = `${(255 - device.max) / 255 * 100}%`;
+                <input id={`control-${device.index}-${control.type}-${control.index}-max`} type="range" class="max-range" min="0" max="255" value="255" step="1"  oninput={(e) => {
+                  control.max = parseInt((e.target as HTMLInputElement)?.value ?? "255");
+                  const rangeInput = document.querySelector(`#control-${device.index}-${control.type}-${control.index}-range-slider`) as HTMLInputElement;
+                  rangeInput.style.right = `${(255 - control.max) / 255 * 100}%`;
                 }} />
             </div>
 

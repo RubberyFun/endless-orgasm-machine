@@ -960,30 +960,36 @@
                     }
 
                     deviceList.forEach((device: any) => {
-                      if (device.mode != "manual") {
-                        let value = 0;
-                        switch (device.mode) {
-                          case "arousal":
-                            value = newReading.arousal / 16;
-                            break;
-                          case "pressure":
-                            value = newReading.pressure / 16;
-                            break;
-                          case "denied":
-                            value = (newReading.denied ?? 0) / settings.max_denied.value;
-                            break;
-                          default:
-                            value = newReading.pleasure ?? 0;
-                            break;
+                      device.controls.forEach((control: any) => {
+                        if (control.mode != "manual") {
+                          let value = 0;
+                          switch (control.mode) {
+                            case "arousal":
+                              value = newReading.arousal / 16;
+                              break;
+                            case "pressure":
+                              value = newReading.pressure / 16;
+                              break;
+                            case "denied":
+                              value = (newReading.denied ?? 0) / settings.max_denied.value * 255;
+                              break;
+                            default:
+                              value = newReading.pleasure ?? 0;
+                              break;
                           }
-                        if (device.sliderElement) {
-                          if (device.sliderElement.value != String(Math.round(value * 255))) {
-                            device.sliderElement.value = String(Math.round(value * 255));
-                            deviceComponent?.handleDeviceChange(device, value / 255.0);
+                          if (control.sliderElement && value >= 0) {
+                            if (control.invert) {
+                              value = 255 - value;
+                            }
+                            //console.log('Updating control:', control, value,Math.round(value),control.sliderElement.value);
+                            if (control.sliderElement.value != String(Math.round(value))) {
+                              control.sliderElement.value = Math.round(value);
+                              deviceComponent?.handleDeviceChange(device, control, value / 255.0);
+                            }
                           }
                         }
-                      }
-                  });
+                      });
+                    });
 
                   while (
                       readings.length > 0 && (Date.now() - (readings[0].localTime ?? 0) > settings.chart_window_s.value * 1000)  
