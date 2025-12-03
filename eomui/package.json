@@ -17,6 +17,7 @@
     "@types/node": "^24.6.0",
     "@vitejs/plugin-basic-ssl": "^2.1.0",
     "patch-package": "^8.0.1",
+    "eventemitter3": "^5.0.1",
     "svelte": "^5.39.6",
     "svelte-check": "^4.3.2",
     "typescript": "~5.9.3",
