@@ -378,7 +378,7 @@ function mn(s) {
   var e = new s();
   return !(e instanceof Set) && !("push" in e) ? [] : e;
 }
-var ae = (
+var ce = (
   /** @class */
   function() {
     function s(e, t) {
@@ -557,7 +557,7 @@ var ae = (
       }) : !0;
     }, s;
   }()
-), ce = {
+), ue = {
   enableCircularCheck: !1,
   enableImplicitConversion: !1,
   excludeExtraneousValues: !1,
@@ -583,22 +583,22 @@ var ae = (
     function s() {
     }
     return s.prototype.instanceToPlain = function(e, t) {
-      var n = new ae(O.CLASS_TO_PLAIN, Z(Z({}, ce), t));
+      var n = new ce(O.CLASS_TO_PLAIN, Z(Z({}, ue), t));
       return n.transform(void 0, e, void 0, void 0, void 0, void 0);
     }, s.prototype.classToPlainFromExist = function(e, t, n) {
-      var o = new ae(O.CLASS_TO_PLAIN, Z(Z({}, ce), n));
+      var o = new ce(O.CLASS_TO_PLAIN, Z(Z({}, ue), n));
       return o.transform(t, e, void 0, void 0, void 0, void 0);
     }, s.prototype.plainToInstance = function(e, t, n) {
-      var o = new ae(O.PLAIN_TO_CLASS, Z(Z({}, ce), n));
+      var o = new ce(O.PLAIN_TO_CLASS, Z(Z({}, ue), n));
       return o.transform(void 0, t, e, void 0, void 0, void 0);
     }, s.prototype.plainToClassFromExist = function(e, t, n) {
-      var o = new ae(O.PLAIN_TO_CLASS, Z(Z({}, ce), n));
+      var o = new ce(O.PLAIN_TO_CLASS, Z(Z({}, ue), n));
       return o.transform(e, t, void 0, void 0, void 0, void 0);
     }, s.prototype.instanceToInstance = function(e, t) {
-      var n = new ae(O.CLASS_TO_CLASS, Z(Z({}, ce), t));
+      var n = new ce(O.CLASS_TO_CLASS, Z(Z({}, ue), t));
       return n.transform(void 0, e, void 0, void 0, void 0, void 0);
     }, s.prototype.classToClassFromExist = function(e, t, n) {
-      var o = new ae(O.CLASS_TO_CLASS, Z(Z({}, ce), n));
+      var o = new ce(O.CLASS_TO_CLASS, Z(Z({}, ue), n));
       return o.transform(t, e, void 0, void 0, void 0, void 0);
     }, s.prototype.serialize = function(e, t) {
       return JSON.stringify(this.instanceToPlain(e, t));
@@ -702,9 +702,9 @@ var Ut;
           throw new TypeError();
         if (!F(i))
           throw new TypeError();
-        if (!F(d) && !S(d) && !oe(d))
+        if (!F(d) && !S(d) && !ae(d))
           throw new TypeError();
-        return oe(d) && (d = void 0), a = ee(a), xe(r, i, a, d);
+        return ae(d) && (d = void 0), a = ee(a), xe(r, i, a, d);
       }
     }
     e("decorate", T);
@@ -779,7 +779,7 @@ var Ut;
     function Se(r, i) {
       for (var a = r.length - 1; a >= 0; --a) {
         var d = r[a], b = d(i);
-        if (!S(b) && !oe(b)) {
+        if (!S(b) && !ae(b)) {
           if (!Nt(b))
             throw new TypeError();
           i = b;
@@ -790,7 +790,7 @@ var Ut;
     function xe(r, i, a, d) {
       for (var b = r.length - 1; b >= 0; --b) {
         var D = r[b], G = D(i, a, d);
-        if (!S(G) && !oe(G)) {
+        if (!S(G) && !ae(G)) {
           if (!F(G))
             throw new TypeError();
           d = G;
@@ -803,7 +803,7 @@ var Ut;
       if (d)
         return !0;
       var b = Ke(i);
-      return oe(b) ? !1 : le(r, b, a);
+      return ae(b) ? !1 : le(r, b, a);
     }
     function ne(r, i, a) {
       var d = pe(
@@ -819,7 +819,7 @@ var Ut;
       if (d)
         return Y(r, i, a);
       var b = Ke(i);
-      if (!oe(b))
+      if (!ae(b))
         return N(r, b, a);
     }
     function Y(r, i, a) {
@@ -892,7 +892,7 @@ var Ut;
     function S(r) {
       return r === void 0;
     }
-    function oe(r) {
+    function ae(r) {
       return r === null;
     }
     function Qt(r) {
@@ -1456,7 +1456,7 @@ class it {
     (e = this.ScalarCmd) == null || e.forEach((c, f) => c.Index = f), (t = this.RotateCmd) == null || t.forEach((c, f) => c.Index = f), (n = this.LinearCmd) == null || n.forEach((c, f) => c.Index = f), (o = this.SensorReadCmd) == null || o.forEach((c, f) => c.Index = f), (u = this.SensorSubscribeCmd) == null || u.forEach((c, f) => c.Index = f);
   }
 }
-var ue = /* @__PURE__ */ ((s) => (s.Unknown = "Unknown", s.Vibrate = "Vibrate", s.Rotate = "Rotate", s.Oscillate = "Oscillate", s.Constrict = "Constrict", s.Inflate = "Inflate", s.Position = "Position", s))(ue || {}), re = /* @__PURE__ */ ((s) => (s.Unknown = "Unknown", s.Battery = "Battery", s.RSSI = "RSSI", s.Button = "Button", s.Pressure = "Pressure", s))(re || {});
+var ie = /* @__PURE__ */ ((s) => (s.Unknown = "Unknown", s.Vibrate = "Vibrate", s.Rotate = "Rotate", s.Oscillate = "Oscillate", s.Constrict = "Constrict", s.Inflate = "Inflate", s.Position = "Position", s))(ie || {}), re = /* @__PURE__ */ ((s) => (s.Unknown = "Unknown", s.Battery = "Battery", s.RSSI = "RSSI", s.Button = "Button", s.Pressure = "Pressure", s))(re || {});
 class xn {
   constructor(e) {
     this.Index = 0, Object.assign(this, e);
@@ -1727,7 +1727,7 @@ Et.Name = "RawReading";
 let ze = Et;
 const En = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  ActuatorType: ue,
+  ActuatorType: ie,
   ButtplugDeviceMessage: X,
   ButtplugMessage: K,
   ButtplugSystemMessage: he,
@@ -1845,7 +1845,7 @@ function Yt(s) {
       return e;
   return null;
 }
-function ie(s) {
+function oe(s) {
   return Yt(Object.getPrototypeOf(s).constructor.Name);
 }
 function zt(s) {
@@ -1909,7 +1909,7 @@ class He extends qe {
   }
   async sendExpectOk(e) {
     const t = await this.send(e);
-    switch (ie(t)) {
+    switch (oe(t)) {
       case ye:
         return;
       case se:
@@ -1964,20 +1964,20 @@ class He extends qe {
   get vibrateAttributes() {
     var e;
     return ((e = this.messageAttributes.ScalarCmd) == null ? void 0 : e.filter(
-      (t) => t.ActuatorType === ue.Vibrate
+      (t) => t.ActuatorType === ie.Vibrate
     )) ?? [];
   }
-  async vibrate(e, t) {
-    await this.scalarCommandBuilder(e, ue.Vibrate, t);
+  async vibrate(e) {
+    await this.scalarCommandBuilder(e, ie.Vibrate);
   }
   get oscillateAttributes() {
     var e;
     return ((e = this.messageAttributes.ScalarCmd) == null ? void 0 : e.filter(
-      (t) => t.ActuatorType === ue.Oscillate
+      (t) => t.ActuatorType === ie.Oscillate
     )) ?? [];
   }
   async oscillate(e, t) {
-    await this.scalarCommandBuilder(e, ue.Oscillate, t);
+    await this.scalarCommandBuilder(e, ie.Oscillate, t);
   }
   get rotateAttributes() {
     return this.messageAttributes.RotateCmd ?? [];
@@ -2003,21 +2003,25 @@ class He extends qe {
     await this.sendExpectOk(o);
   }
   get linearAttributes() {
-    return this.messageAttributes.LinearCmd ?? [];
+    var e;
+    return ((e = this.messageAttributes.ScalarCmd) == null ? void 0 : e.filter(
+      (t) => t.ActuatorType === ie.Position
+    )) ?? [];
   }
   async linear(e, t) {
-    const n = this.messageAttributes.LinearCmd;
+    const n = this.linearAttributes;
     if (!n || n.length === 0)
       throw new B(
         `Device ${this.name} has no Linear capabilities`
       );
     let o;
-    if (typeof e == "number")
+    if (typeof e == "number") {
+      const u = t !== void 0 ? [e, t] : [e];
       o = Me.Create(
         this.index,
-        new Array(n.length).fill([e, t])
+        new Array(n.length).fill(u)
       );
-    else if (Array.isArray(e))
+    } else if (Array.isArray(e))
       o = Me.Create(this.index, e);
     else
       throw new B(
@@ -2029,7 +2033,7 @@ class He extends qe {
     const n = await this.send(
       new $e(this.index, e, t)
     );
-    switch (ie(n)) {
+    switch (oe(n)) {
       case Be:
         return n.Data;
       case se:
@@ -2094,7 +2098,7 @@ class He extends qe {
     const o = await this.send(
       new Fe(this.index, e, t, n)
     );
-    switch (ie(o)) {
+    switch (oe(o)) {
       case ze:
         return new Uint8Array(o.Data);
       case se:
@@ -2220,7 +2224,7 @@ class kn extends qe {
     }, this.parseMessages = (t) => {
       const n = this._sorter.ParseIncomingMessages(t);
       for (const o of n)
-        switch (ie(o)) {
+        switch (oe(o)) {
           case ve: {
             const u = o, c = He.fromMsg(
               u,
@@ -2249,7 +2253,7 @@ class kn extends qe {
           Ce
         )
       );
-      switch (ie(t)) {
+      switch (oe(t)) {
         case ke: {
           const n = t;
           if (this._logger.Info(
@@ -2291,7 +2295,7 @@ class kn extends qe {
       await this.stopAllDevices(), this._pingTimer !== null && (clearInterval(this._pingTimer), this._pingTimer = null);
     }, this.sendMsgExpectOk = async (t) => {
       const n = await this.sendMessage(t);
-      switch (ie(n)) {
+      switch (oe(n)) {
         case ye:
           return;
         case se:
@@ -2300,7 +2304,7 @@ class kn extends qe {
           throw H.LogAndError(
             ge,
             this._logger,
-            `Message type ${ie(n).constructor} not handled by SendMsgExpectOk`
+            `Message type ${oe(n).constructor} not handled by SendMsgExpectOk`
           );
       }
     }, this.sendDeviceMessageClosure = async (t, n) => await this.sendDeviceMessage(t, n), this._clientName = e, this._logger.Debug(`ButtplugClient: Client ${e} created.`);
@@ -2398,7 +2402,7 @@ class Dn extends Tn {
   }
 }
 export {
-  ue as ActuatorType,
+  ie as ActuatorType,
   Tn as ButtplugBrowserWebsocketClientConnector,
   kn as ButtplugClient,
   Pn as ButtplugClientConnectorException,
@@ -2457,5 +2461,5 @@ export {
   Re as StopScanning,
   Xt as VectorSubcommand,
   zt as fromJSON,
-  ie as getMessageClassFromMessage
+  oe as getMessageClassFromMessage
 };

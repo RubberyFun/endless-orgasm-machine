@@ -46,7 +46,7 @@ export declare class ButtplugClientDevice extends EventEmitter {
     scalar(scalar: Messages.ScalarSubcommand | Messages.ScalarSubcommand[]): Promise<void>;
     private scalarCommandBuilder;
     get vibrateAttributes(): Messages.GenericDeviceMessageAttributes[];
-    vibrate(speed: number | number[], index?: number): Promise<void>;
+    vibrate(speed: number | number[]): Promise<void>;
     get oscillateAttributes(): Messages.GenericDeviceMessageAttributes[];
     oscillate(speed: number | number[], index?: number): Promise<void>;
     get rotateAttributes(): Messages.GenericDeviceMessageAttributes[];
