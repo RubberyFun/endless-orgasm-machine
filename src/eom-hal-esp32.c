@@ -195,31 +195,24 @@ void eom_hal_set_rgb(uint8_t r, uint8_t g, uint8_t b) {
         return; //no change
     }
 
-    // if (LED_TYPE == LED_TYPE_MONO) {
-    //     if (r > 250 && (!is_flashing || flash_on)) {  //using red value as on/off
-    //         eom_hal_set_led_mono(1);
-    //     } else {
-    //         eom_hal_set_led_mono(0);
-    //     }
-    // } else 
-    if (LED_TYPE == LED_TYPE_WS2812) {
+    if (!is_flashing || flash_on) {
+            led_color.r = r;
+            led_color.g = g;
+            led_color.b = b;
+    } else {
+        led_color.r = 0;
+        led_color.g = 0;
+        led_color.b = 0;
+    }
 
+    if (LED_TYPE == LED_TYPE_WS2812) {
         if (led_strip == NULL) {
             ESP_LOGW(TAG, "LED strip not initialized");
             return;
         }
         esp_err_t err = ESP_OK;
-        if (!is_flashing || flash_on) {
-            err = led_strip_set_pixel(led_strip, 0, r, g, b);
-                led_color.r = r;
-                led_color.g = g;
-                led_color.b = b;
-        } else {
-            err = led_strip_set_pixel(led_strip, 0, 0, 0, 0);
-            led_color.r = 0;
-            led_color.g = 0;
-            led_color.b = 0;
-        }
+        err = led_strip_set_pixel(led_strip, 0, r, g, b);
+
         if (err != ESP_OK) {
             ESP_LOGE(TAG, "led_strip_set_pixel failed: %s", esp_err_to_name(err));
             return;
@@ -241,7 +234,7 @@ void eom_hal_set_led_flashing(uint8_t flashing) {
 }
 
 void eom_hal_set_led_flash_interval(uint16_t interval_ms) {
-    ESP_LOGW(TAG, "LED flash set to %d", interval_ms);
+    //ESP_LOGW(TAG, "LED flash set to %d", interval_ms);
     flash_interval = interval_ms;
 }
 
