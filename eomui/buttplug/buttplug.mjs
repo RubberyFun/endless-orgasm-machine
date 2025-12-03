@@ -20,26 +20,26 @@ var Ht = { exports: {} };
   function c(v, _) {
     --v._eventsCount === 0 ? v._events = new n() : delete v._events[_];
   }
-  function d() {
+  function f() {
     this._events = new n(), this._eventsCount = 0;
   }
-  d.prototype.eventNames = function() {
+  f.prototype.eventNames = function() {
     var _ = [], l, w;
     if (this._eventsCount === 0) return _;
     for (w in l = this._events)
       e.call(l, w) && _.push(t ? w.slice(1) : w);
     return Object.getOwnPropertySymbols ? _.concat(Object.getOwnPropertySymbols(l)) : _;
-  }, d.prototype.listeners = function(_) {
+  }, f.prototype.listeners = function(_) {
     var l = t ? t + _ : _, w = this._events[l];
     if (!w) return [];
     if (w.fn) return [w.fn];
     for (var h = 0, P = w.length, I = new Array(P); h < P; h++)
       I[h] = w[h].fn;
     return I;
-  }, d.prototype.listenerCount = function(_) {
+  }, f.prototype.listenerCount = function(_) {
     var l = t ? t + _ : _, w = this._events[l];
     return w ? w.fn ? 1 : w.length : 0;
-  }, d.prototype.emit = function(_, l, w, h, P, I) {
+  }, f.prototype.emit = function(_, l, w, h, P, I) {
     var W = t ? t + _ : _;
     if (!this._events[W]) return !1;
     var y = this._events[W], R = arguments.length, T, x;
@@ -84,11 +84,11 @@ var Ht = { exports: {} };
         }
     }
     return !0;
-  }, d.prototype.on = function(_, l, w) {
+  }, f.prototype.on = function(_, l, w) {
     return u(this, _, l, w, !1);
-  }, d.prototype.once = function(_, l, w) {
+  }, f.prototype.once = function(_, l, w) {
     return u(this, _, l, w, !0);
-  }, d.prototype.removeListener = function(_, l, w, h) {
+  }, f.prototype.removeListener = function(_, l, w, h) {
     var P = t ? t + _ : _;
     if (!this._events[P]) return this;
     if (!l)
@@ -102,13 +102,13 @@ var Ht = { exports: {} };
       y.length ? this._events[P] = y.length === 1 ? y[0] : y : c(this, P);
     }
     return this;
-  }, d.prototype.removeAllListeners = function(_) {
+  }, f.prototype.removeAllListeners = function(_) {
     var l;
     return _ ? (l = t ? t + _ : _, this._events[l] && c(this, l)) : (this._events = new n(), this._eventsCount = 0), this;
-  }, d.prototype.off = d.prototype.removeListener, d.prototype.addListener = d.prototype.on, d.prefixed = t, d.EventEmitter = d, s.exports = d;
+  }, f.prototype.off = f.prototype.removeListener, f.prototype.addListener = f.prototype.on, f.prefixed = t, f.EventEmitter = f, s.exports = f;
 })(Ht);
 var ln = Ht.exports;
-const Ze = /* @__PURE__ */ hn(ln);
+const qe = /* @__PURE__ */ hn(ln);
 /*!
  * Buttplug JS Source Code File - Visit https://buttplug.io for more info about
  * the project. Licensed under the BSD 3-Clause license. See LICENSE file in the
@@ -151,7 +151,7 @@ class pn {
     return `${Jt[this.logLevel]} : ${this.timestamp} : ${this.logMessage}`;
   }
 }
-const fe = class fe extends Ze {
+const fe = class fe extends qe {
   /**
    * Constructor. Can only be called internally since we regulate ButtplugLogger
    * ownership.
@@ -252,7 +252,7 @@ const fe = class fe extends Ze {
   }
 };
 fe.sLogger = void 0;
-let Ve = fe;
+let et = fe;
 var O;
 (function(s) {
   s[s.PLAIN_TO_CLASS = 0] = "PLAIN_TO_CLASS", s[s.CLASS_TO_PLAIN = 1] = "CLASS_TO_PLAIN", s[s.CLASS_TO_CLASS = 2] = "CLASS_TO_CLASS";
@@ -311,8 +311,8 @@ var gn = (
       n && (o = Array.from(n.values()).filter(function(w) {
         return w.propertyName !== void 0;
       }));
-      for (var u = [], c = 0, d = this.getAncestors(t); c < d.length; c++) {
-        var v = d[c], _ = e.get(v);
+      for (var u = [], c = 0, f = this.getAncestors(t); c < f.length; c++) {
+        var v = f[c], _ = e.get(v);
         if (_) {
           var l = Array.from(_.values()).filter(function(w) {
             return w.propertyName !== void 0;
@@ -328,8 +328,8 @@ var gn = (
         if (u)
           return u;
       }
-      for (var c = 0, d = this.getAncestors(t); c < d.length; c++) {
-        var v = d[c], _ = e.get(v);
+      for (var c = 0, f = this.getAncestors(t); c < f.length; c++) {
+        var v = f[c], _ = e.get(v);
         if (_) {
           var l = _.get(n);
           if (l)
@@ -339,8 +339,8 @@ var gn = (
     }, s.prototype.findMetadatas = function(e, t, n) {
       var o = e.get(t), u;
       o && (u = o.get(n));
-      for (var c = [], d = 0, v = this.getAncestors(t); d < v.length; d++) {
-        var _ = v[d], l = e.get(_);
+      for (var c = [], f = 0, v = this.getAncestors(t); f < v.length; f++) {
+        var _ = v[f], l = e.get(_);
         l && l.has(n) && c.push.apply(c, l.get(n));
       }
       return c.slice().reverse().concat((u || []).slice().reverse());
@@ -378,36 +378,36 @@ function mn(s) {
   var e = new s();
   return !(e instanceof Set) && !("push" in e) ? [] : e;
 }
-var ce = (
+var ae = (
   /** @class */
   function() {
     function s(e, t) {
       this.transformationType = e, this.options = t, this.recursionStack = /* @__PURE__ */ new Set();
     }
     return s.prototype.transform = function(e, t, n, o, u, c) {
-      var d = this;
+      var f = this;
       if (c === void 0 && (c = 0), Array.isArray(t) || t instanceof Set) {
         var v = o && this.transformationType === O.PLAIN_TO_CLASS ? mn(o) : [];
         return t.forEach(function(y, R) {
           var T = e ? e[R] : void 0;
-          if (!d.options.enableCircularCheck || !d.isCircular(y)) {
+          if (!f.options.enableCircularCheck || !f.isCircular(y)) {
             var x = void 0;
             if (typeof n != "function" && n && n.options && n.options.discriminator && n.options.discriminator.property && n.options.discriminator.subTypes) {
-              if (d.transformationType === O.PLAIN_TO_CLASS) {
+              if (f.transformationType === O.PLAIN_TO_CLASS) {
                 x = n.options.discriminator.subTypes.find(function(V) {
                   return V.name === y[n.options.discriminator.property];
                 });
                 var J = { newObject: v, object: y, property: void 0 }, A = n.typeFunction(J);
                 x === void 0 ? x = A : x = x.value, n.options.keepDiscriminatorProperty || delete y[n.options.discriminator.property];
               }
-              d.transformationType === O.CLASS_TO_CLASS && (x = y.constructor), d.transformationType === O.CLASS_TO_PLAIN && (y[n.options.discriminator.property] = n.options.discriminator.subTypes.find(function(V) {
+              f.transformationType === O.CLASS_TO_CLASS && (x = y.constructor), f.transformationType === O.CLASS_TO_PLAIN && (y[n.options.discriminator.property] = n.options.discriminator.subTypes.find(function(V) {
                 return V.value === y.constructor;
               }).name);
             } else
               x = n;
-            var U = d.transform(T, y, x, void 0, y instanceof Map, c + 1);
+            var U = f.transform(T, y, x, void 0, y instanceof Map, c + 1);
             v instanceof Set ? v.add(U) : v.push(U);
-          } else d.transformationType === O.CLASS_TO_CLASS && (v instanceof Set ? v.add(y) : v.push(y));
+          } else f.transformationType === O.CLASS_TO_CLASS && (v instanceof Set ? v.add(y) : v.push(y));
         }), v;
       } else {
         if (n === String && !u)
@@ -423,7 +423,7 @@ var ce = (
         if (vn(t) && !u)
           return new Promise(function(y, R) {
             t.then(function(T) {
-              return y(d.transform(void 0, T, n, void 0, void 0, c + 1));
+              return y(f.transform(void 0, T, n, void 0, void 0, c + 1));
             }, R);
           });
         if (!u && t !== null && typeof t == "object" && typeof t.then == "function")
@@ -451,15 +451,15 @@ var ce = (
             if (n && u)
               U = n;
             else if (n) {
-              var B = z.findTypeMetadata(n, x);
-              if (B) {
-                var Xe = { newObject: l, object: t, property: x }, _e = B.typeFunction ? B.typeFunction(Xe) : B.reflectedType;
-                B.options && B.options.discriminator && B.options.discriminator.property && B.options.discriminator.subTypes ? t[R] instanceof Array ? U = B : (h.transformationType === O.PLAIN_TO_CLASS && (U = B.options.discriminator.subTypes.find(function(Y) {
-                  if (A && A instanceof Object && B.options.discriminator.property in A)
-                    return Y.name === A[B.options.discriminator.property];
-                }), U === void 0 ? U = _e : U = U.value, B.options.keepDiscriminatorProperty || A && A instanceof Object && B.options.discriminator.property in A && delete A[B.options.discriminator.property]), h.transformationType === O.CLASS_TO_CLASS && (U = A.constructor), h.transformationType === O.CLASS_TO_PLAIN && A && (A[B.options.discriminator.property] = B.options.discriminator.subTypes.find(function(Y) {
+              var $ = z.findTypeMetadata(n, x);
+              if ($) {
+                var Ye = { newObject: l, object: t, property: x }, _e = $.typeFunction ? $.typeFunction(Ye) : $.reflectedType;
+                $.options && $.options.discriminator && $.options.discriminator.property && $.options.discriminator.subTypes ? t[R] instanceof Array ? U = $ : (h.transformationType === O.PLAIN_TO_CLASS && (U = $.options.discriminator.subTypes.find(function(Y) {
+                  if (A && A instanceof Object && $.options.discriminator.property in A)
+                    return Y.name === A[$.options.discriminator.property];
+                }), U === void 0 ? U = _e : U = U.value, $.options.keepDiscriminatorProperty || A && A instanceof Object && $.options.discriminator.property in A && delete A[$.options.discriminator.property]), h.transformationType === O.CLASS_TO_CLASS && (U = A.constructor), h.transformationType === O.CLASS_TO_PLAIN && A && (A[$.options.discriminator.property] = $.options.discriminator.subTypes.find(function(Y) {
                   return Y.value === A.constructor;
-                }).name)) : U = _e, V = V || B.reflectedType === Map;
+                }).name)) : U = _e, V = V || $.reflectedType === Map;
               } else if (h.options.targetMaps)
                 h.options.targetMaps.filter(function(Y) {
                   return Y.target === n && !!Y.properties[x];
@@ -494,14 +494,14 @@ var ce = (
           return t;
       }
     }, s.prototype.applyCustomTransformations = function(e, t, n, o, u) {
-      var c = this, d = z.findTransformMetadatas(t, n, this.transformationType);
-      return this.options.version !== void 0 && (d = d.filter(function(v) {
+      var c = this, f = z.findTransformMetadatas(t, n, this.transformationType);
+      return this.options.version !== void 0 && (f = f.filter(function(v) {
         return v.options ? c.checkVersion(v.options.since, v.options.until) : !0;
-      })), this.options.groups && this.options.groups.length ? d = d.filter(function(v) {
+      })), this.options.groups && this.options.groups.length ? f = f.filter(function(v) {
         return v.options ? c.checkGroups(v.options.groups) : !0;
-      }) : d = d.filter(function(v) {
+      }) : f = f.filter(function(v) {
         return !v.options || !v.options.groups || !v.options.groups.length;
-      }), d.forEach(function(v) {
+      }), f.forEach(function(v) {
         e = v.transformFn({ value: e, key: n, obj: o, type: u, options: c.options });
       }), e;
     }, s.prototype.isCircular = function(e) {
@@ -518,15 +518,15 @@ var ce = (
       if ((u === "exposeAll" || n) && (t instanceof Map ? c = Array.from(t.keys()) : c = Object.keys(t)), n)
         return c;
       if (this.options.ignoreDecorators && this.options.excludeExtraneousValues && e) {
-        var d = z.getExposedProperties(e, this.transformationType), v = z.getExcludedProperties(e, this.transformationType);
-        c = Wt(Wt([], d, !0), v, !0);
+        var f = z.getExposedProperties(e, this.transformationType), v = z.getExcludedProperties(e, this.transformationType);
+        c = Wt(Wt([], f, !0), v, !0);
       }
       if (!this.options.ignoreDecorators && e) {
-        var d = z.getExposedProperties(e, this.transformationType);
-        this.transformationType === O.PLAIN_TO_CLASS && (d = d.map(function(w) {
+        var f = z.getExposedProperties(e, this.transformationType);
+        this.transformationType === O.PLAIN_TO_CLASS && (f = f.map(function(w) {
           var h = z.findExposeMetadata(e, w);
           return h && h.options && h.options.name ? h.options.name : w;
-        })), this.options.excludeExtraneousValues ? c = d : c = c.concat(d);
+        })), this.options.excludeExtraneousValues ? c = f : c = c.concat(f);
         var _ = z.getExcludedProperties(e, this.transformationType);
         _.length > 0 && (c = c.filter(function(w) {
           return !_.includes(w);
@@ -557,7 +557,7 @@ var ce = (
       }) : !0;
     }, s;
   }()
-), ue = {
+), ce = {
   enableCircularCheck: !1,
   enableImplicitConversion: !1,
   excludeExtraneousValues: !1,
@@ -583,22 +583,22 @@ var ce = (
     function s() {
     }
     return s.prototype.instanceToPlain = function(e, t) {
-      var n = new ce(O.CLASS_TO_PLAIN, Z(Z({}, ue), t));
+      var n = new ae(O.CLASS_TO_PLAIN, Z(Z({}, ce), t));
       return n.transform(void 0, e, void 0, void 0, void 0, void 0);
     }, s.prototype.classToPlainFromExist = function(e, t, n) {
-      var o = new ce(O.CLASS_TO_PLAIN, Z(Z({}, ue), n));
+      var o = new ae(O.CLASS_TO_PLAIN, Z(Z({}, ce), n));
       return o.transform(t, e, void 0, void 0, void 0, void 0);
     }, s.prototype.plainToInstance = function(e, t, n) {
-      var o = new ce(O.PLAIN_TO_CLASS, Z(Z({}, ue), n));
+      var o = new ae(O.PLAIN_TO_CLASS, Z(Z({}, ce), n));
       return o.transform(void 0, t, e, void 0, void 0, void 0);
     }, s.prototype.plainToClassFromExist = function(e, t, n) {
-      var o = new ce(O.PLAIN_TO_CLASS, Z(Z({}, ue), n));
+      var o = new ae(O.PLAIN_TO_CLASS, Z(Z({}, ce), n));
       return o.transform(e, t, void 0, void 0, void 0, void 0);
     }, s.prototype.instanceToInstance = function(e, t) {
-      var n = new ce(O.CLASS_TO_CLASS, Z(Z({}, ue), t));
+      var n = new ae(O.CLASS_TO_CLASS, Z(Z({}, ce), t));
       return n.transform(void 0, e, void 0, void 0, void 0, void 0);
     }, s.prototype.classToClassFromExist = function(e, t, n) {
-      var o = new ce(O.CLASS_TO_CLASS, Z(Z({}, ue), n));
+      var o = new ae(O.CLASS_TO_CLASS, Z(Z({}, ce), n));
       return o.transform(t, e, void 0, void 0, void 0, void 0);
     }, s.prototype.serialize = function(e, t) {
       return JSON.stringify(this.instanceToPlain(e, t));
@@ -647,7 +647,7 @@ and limitations under the License.
 var Ut;
 (function(s) {
   (function(e) {
-    var t = typeof globalThis == "object" ? globalThis : typeof Gt == "object" ? Gt : typeof self == "object" ? self : typeof this == "object" ? this : d(), n = o(s);
+    var t = typeof globalThis == "object" ? globalThis : typeof Gt == "object" ? Gt : typeof self == "object" ? self : typeof this == "object" ? this : f(), n = o(s);
     typeof t.Reflect < "u" && (n = o(t.Reflect, n)), e(n, t), typeof t.Reflect > "u" && (t.Reflect = s);
     function o(v, _) {
       return function(l, w) {
@@ -666,18 +666,18 @@ var Ut;
       } catch {
       }
     }
-    function d() {
+    function f() {
       return u() || c();
     }
   })(function(e, t) {
-    var n = Object.prototype.hasOwnProperty, o = typeof Symbol == "function", u = o && typeof Symbol.toPrimitive < "u" ? Symbol.toPrimitive : "@@toPrimitive", c = o && typeof Symbol.iterator < "u" ? Symbol.iterator : "@@iterator", d = typeof Object.create == "function", v = { __proto__: [] } instanceof Array, _ = !d && !v, l = {
+    var n = Object.prototype.hasOwnProperty, o = typeof Symbol == "function", u = o && typeof Symbol.toPrimitive < "u" ? Symbol.toPrimitive : "@@toPrimitive", c = o && typeof Symbol.iterator < "u" ? Symbol.iterator : "@@iterator", f = typeof Object.create == "function", v = { __proto__: [] } instanceof Array, _ = !f && !v, l = {
       // create an object in dictionary mode (a.k.a. "slow" mode in v8)
-      create: d ? function() {
-        return Ke(/* @__PURE__ */ Object.create(null));
+      create: f ? function() {
+        return Ve(/* @__PURE__ */ Object.create(null));
       } : v ? function() {
-        return Ke({ __proto__: null });
+        return Ve({ __proto__: null });
       } : function() {
-        return Ke({});
+        return Ve({});
       },
       has: _ ? function(r, i) {
         return n.call(r, i);
@@ -690,7 +690,7 @@ var Ut;
         return r[i];
       }
     }, w = Object.getPrototypeOf(Function), h = typeof Map == "function" && typeof Map.prototype.entries == "function" ? Map : an(), P = typeof Set == "function" && typeof Set.prototype.entries == "function" ? Set : cn(), I = typeof WeakMap == "function" ? WeakMap : un(), W = o ? Symbol.for("@reflect-metadata:registry") : void 0, y = rn(), R = sn(y);
-    function T(r, i, a, f) {
+    function T(r, i, a, d) {
       if (S(a)) {
         if (!Tt(r))
           throw new TypeError();
@@ -700,86 +700,86 @@ var Ut;
       } else {
         if (!Tt(r))
           throw new TypeError();
-        if (!$(i))
+        if (!F(i))
           throw new TypeError();
-        if (!$(f) && !S(f) && !ae(f))
+        if (!F(d) && !S(d) && !oe(d))
           throw new TypeError();
-        return ae(f) && (f = void 0), a = ee(a), xe(r, i, a, f);
+        return oe(d) && (d = void 0), a = ee(a), xe(r, i, a, d);
       }
     }
     e("decorate", T);
     function x(r, i) {
-      function a(f, b) {
-        if (!$(f))
+      function a(d, b) {
+        if (!F(d))
           throw new TypeError();
         if (!S(b) && !tn(b))
           throw new TypeError();
-        At(r, i, f, b);
+        At(r, i, d, b);
       }
       return a;
     }
     e("metadata", x);
-    function J(r, i, a, f) {
-      if (!$(a))
+    function J(r, i, a, d) {
+      if (!F(a))
         throw new TypeError();
-      return S(f) || (f = ee(f)), At(r, i, a, f);
+      return S(d) || (d = ee(d)), At(r, i, a, d);
     }
     e("defineMetadata", J);
     function A(r, i, a) {
-      if (!$(i))
+      if (!F(i))
         throw new TypeError();
       return S(a) || (a = ee(a)), le(r, i, a);
     }
     e("hasMetadata", A);
     function U(r, i, a) {
-      if (!$(i))
+      if (!F(i))
         throw new TypeError();
       return S(a) || (a = ee(a)), ne(r, i, a);
     }
     e("hasOwnMetadata", U);
     function V(r, i, a) {
-      if (!$(i))
+      if (!F(i))
         throw new TypeError();
       return S(a) || (a = ee(a)), N(r, i, a);
     }
     e("getMetadata", V);
-    function B(r, i, a) {
-      if (!$(i))
+    function $(r, i, a) {
+      if (!F(i))
         throw new TypeError();
       return S(a) || (a = ee(a)), Y(r, i, a);
     }
-    e("getOwnMetadata", B);
-    function Xe(r, i) {
-      if (!$(r))
+    e("getOwnMetadata", $);
+    function Ye(r, i) {
+      if (!F(r))
         throw new TypeError();
       return S(i) || (i = ee(i)), It(r, i);
     }
-    e("getMetadataKeys", Xe);
+    e("getMetadataKeys", Ye);
     function _e(r, i) {
-      if (!$(r))
+      if (!F(r))
         throw new TypeError();
       return S(i) || (i = ee(i)), Lt(r, i);
     }
     e("getOwnMetadataKeys", _e);
     function be(r, i, a) {
-      if (!$(i))
+      if (!F(i))
         throw new TypeError();
-      if (S(a) || (a = ee(a)), !$(i))
+      if (S(a) || (a = ee(a)), !F(i))
         throw new TypeError();
       S(a) || (a = ee(a));
-      var f = pe(
+      var d = pe(
         i,
         a,
         /*Create*/
         !1
       );
-      return S(f) ? !1 : f.OrdinaryDeleteMetadata(r, i, a);
+      return S(d) ? !1 : d.OrdinaryDeleteMetadata(r, i, a);
     }
     e("deleteMetadata", be);
     function Se(r, i) {
       for (var a = r.length - 1; a >= 0; --a) {
-        var f = r[a], b = f(i);
-        if (!S(b) && !ae(b)) {
+        var d = r[a], b = d(i);
+        if (!S(b) && !oe(b)) {
           if (!Nt(b))
             throw new TypeError();
           i = b;
@@ -787,78 +787,78 @@ var Ut;
       }
       return i;
     }
-    function xe(r, i, a, f) {
+    function xe(r, i, a, d) {
       for (var b = r.length - 1; b >= 0; --b) {
-        var D = r[b], F = D(i, a, f);
-        if (!S(F) && !ae(F)) {
-          if (!$(F))
+        var D = r[b], G = D(i, a, d);
+        if (!S(G) && !oe(G)) {
+          if (!F(G))
             throw new TypeError();
-          f = F;
+          d = G;
         }
       }
-      return f;
+      return d;
     }
     function le(r, i, a) {
-      var f = ne(r, i, a);
-      if (f)
+      var d = ne(r, i, a);
+      if (d)
         return !0;
-      var b = Qe(i);
-      return ae(b) ? !1 : le(r, b, a);
+      var b = Ke(i);
+      return oe(b) ? !1 : le(r, b, a);
     }
     function ne(r, i, a) {
-      var f = pe(
+      var d = pe(
         i,
         a,
         /*Create*/
         !1
       );
-      return S(f) ? !1 : Rt(f.OrdinaryHasOwnMetadata(r, i, a));
+      return S(d) ? !1 : Rt(d.OrdinaryHasOwnMetadata(r, i, a));
     }
     function N(r, i, a) {
-      var f = ne(r, i, a);
-      if (f)
+      var d = ne(r, i, a);
+      if (d)
         return Y(r, i, a);
-      var b = Qe(i);
-      if (!ae(b))
+      var b = Ke(i);
+      if (!oe(b))
         return N(r, b, a);
     }
     function Y(r, i, a) {
-      var f = pe(
+      var d = pe(
         i,
         a,
         /*Create*/
         !1
       );
-      if (!S(f))
-        return f.OrdinaryGetOwnMetadata(r, i, a);
+      if (!S(d))
+        return d.OrdinaryGetOwnMetadata(r, i, a);
     }
-    function At(r, i, a, f) {
+    function At(r, i, a, d) {
       var b = pe(
         a,
-        f,
+        d,
         /*Create*/
         !0
       );
-      b.OrdinaryDefineOwnMetadata(r, i, a, f);
+      b.OrdinaryDefineOwnMetadata(r, i, a, d);
     }
     function It(r, i) {
-      var a = Lt(r, i), f = Qe(r);
-      if (f === null)
+      var a = Lt(r, i), d = Ke(r);
+      if (d === null)
         return a;
-      var b = It(f, i);
+      var b = It(d, i);
       if (b.length <= 0)
         return a;
       if (a.length <= 0)
         return b;
-      for (var D = new P(), F = [], C = 0, p = a; C < p.length; C++) {
+      for (var D = new P(), G = [], C = 0, p = a; C < p.length; C++) {
         var g = p[C], m = D.has(g);
-        m || (D.add(g), F.push(g));
+        m || (D.add(g), G.push(g));
       }
       for (var M = 0, E = b; M < E.length; M++) {
         var g = E[M], m = D.has(g);
-        m || (D.add(g), F.push(g));
+        m || (D.add(g), G.push(g));
       }
-      return F;
+      return G;
     }
     function Lt(r, i) {
       var a = pe(
@@ -892,13 +892,13 @@ var Ut;
     function S(r) {
       return r === void 0;
     }
-    function ae(r) {
+    function oe(r) {
       return r === null;
     }
     function Qt(r) {
       return typeof r == "symbol";
     }
-    function $(r) {
+    function F(r) {
       return typeof r == "object" ? r !== null : typeof r == "function";
     }
     function Kt(r, i) {
@@ -916,29 +916,29 @@ var Ut;
         case 5:
           return r;
       }
-      var a = "string", f = kt(r, u);
-      if (f !== void 0) {
-        var b = f.call(r, a);
-        if ($(b))
+      var a = "string", d = kt(r, u);
+      if (d !== void 0) {
+        var b = d.call(r, a);
+        if (F(b))
           throw new TypeError();
         return b;
       }
       return Vt(r);
     }
     function Vt(r, i) {
-      var a, f, b;
+      var a, d, b;
       {
         var D = r.toString;
         if (Oe(D)) {
-          var f = D.call(r);
-          if (!$(f))
-            return f;
+          var d = D.call(r);
+          if (!F(d))
+            return d;
         }
         var a = r.valueOf;
         if (Oe(a)) {
-          var f = a.call(r);
-          if (!$(f))
-            return f;
+          var d = a.call(r);
+          if (!F(d))
+            return d;
         }
       }
       throw new TypeError();
@@ -972,7 +972,7 @@ var Ut;
           return !1;
       }
     }
-    function Ye(r, i) {
+    function Qe(r, i) {
       return r === i || r !== r && i !== i;
     }
     function kt(r, i) {
@@ -988,41 +988,41 @@ var Ut;
       if (!Oe(i))
         throw new TypeError();
       var a = i.call(r);
-      if (!$(a))
+      if (!F(a))
         throw new TypeError();
       return a;
     }
     function jt(r) {
       return r.value;
     }
-    function Bt(r) {
+    function $t(r) {
       var i = r.next();
       return i.done ? !1 : i;
     }
-    function $t(r) {
+    function Bt(r) {
       var i = r.return;
       i && i.call(r);
     }
-    function Qe(r) {
+    function Ke(r) {
       var i = Object.getPrototypeOf(r);
       if (typeof r != "function" || r === w || i !== w)
         return i;
-      var a = r.prototype, f = a && Object.getPrototypeOf(a);
-      if (f == null || f === Object.prototype)
+      var a = r.prototype, d = a && Object.getPrototypeOf(a);
+      if (d == null || d === Object.prototype)
         return i;
-      var b = f.constructor;
+      var b = d.constructor;
       return typeof b != "function" || b === r ? i : b;
     }
     function nn() {
       var r;
       !S(W) && typeof t.Reflect < "u" && !(W in t.Reflect) && typeof t.Reflect.defineMetadata == "function" && (r = on(t.Reflect));
-      var i, a, f, b = new I(), D = {
-        registerProvider: F,
+      var i, a, d, b = new I(), D = {
+        registerProvider: G,
         getProvider: p,
         setProvider: m
       };
       return D;
-      function F(M) {
+      function G(M) {
         if (!Object.isExtensible(D))
           throw new Error("Cannot add provider to a frozen registry.");
         switch (!0) {
@@ -1039,7 +1039,7 @@ var Ut;
           case a === M:
             break;
           default:
-            f === void 0 && (f = new P()), f.add(M);
+            d === void 0 && (d = new P()), d.add(M);
             break;
         }
       }
@@ -1050,14 +1050,14 @@ var Ut;
           if (!S(a)) {
             if (a.isProviderFor(M, E))
               return i;
-            if (!S(f))
-              for (var L = Dt(f); ; ) {
-                var j = Bt(L);
+            if (!S(d))
+              for (var L = Dt(d); ; ) {
+                var j = $t(L);
                 if (!j)
                   return;
                 var Q = jt(j);
                 if (Q.isProviderFor(M, E))
-                  return $t(L), Q;
+                  return Bt(L), Q;
               }
           }
         }
@@ -1071,7 +1071,7 @@ var Ut;
       function g(M) {
         if (S(M))
           throw new TypeError();
-        return i === M || a === M || !S(f) && f.has(M);
+        return i === M || a === M || !S(d) && d.has(M);
       }
       function m(M, E, L) {
         if (!g(L))
@@ -1088,7 +1088,7 @@ var Ut;
     }
     function rn() {
       var r;
-      return !S(W) && $(t.Reflect) && Object.isExtensible(t.Reflect) && (r = t.Reflect[W]), S(r) && (r = nn()), !S(W) && $(t.Reflect) && Object.isExtensible(t.Reflect) && Object.defineProperty(t.Reflect, W, {
+      return !S(W) && F(t.Reflect) && Object.isExtensible(t.Reflect) && (r = t.Reflect[W]), S(r) && (r = nn()), !S(W) && F(t.Reflect) && Object.isExtensible(t.Reflect) && Object.defineProperty(t.Reflect, W, {
         enumerable: !1,
         configurable: !1,
         writable: !1,
@@ -1101,14 +1101,14 @@ var Ut;
           var M = i.get(g);
           return S(M) ? !1 : M.has(m);
         },
-        OrdinaryDefineOwnMetadata: F,
+        OrdinaryDefineOwnMetadata: G,
         OrdinaryHasOwnMetadata: b,
         OrdinaryGetOwnMetadata: D,
         OrdinaryOwnMetadataKeys: C,
         OrdinaryDeleteMetadata: p
       };
       return y.registerProvider(a), a;
-      function f(g, m, M) {
+      function d(g, m, M) {
         var E = i.get(g), L = !1;
         if (S(E)) {
           if (!M)
@@ -1125,7 +1125,7 @@ var Ut;
         return j;
       }
       function b(g, m, M) {
-        var E = f(
+        var E = d(
           m,
           M,
           /*Create*/
@@ -1134,7 +1134,7 @@ var Ut;
         return S(E) ? !1 : Rt(E.has(g));
       }
       function D(g, m, M) {
-        var E = f(
+        var E = d(
           m,
           M,
           /*Create*/
@@ -1143,8 +1143,8 @@ var Ut;
         if (!S(E))
           return E.get(g);
       }
-      function F(g, m, M, E) {
-        var L = f(
+      function G(g, m, M, E) {
+        var L = d(
           M,
           E,
           /*Create*/
@@ -1153,7 +1153,7 @@ var Ut;
         L.set(g, m);
       }
       function C(g, m) {
-        var M = [], E = f(
+        var M = [], E = d(
           g,
           m,
           /*Create*/
@@ -1162,7 +1162,7 @@ var Ut;
         if (S(E))
           return M;
         for (var L = E.keys(), j = Dt(L), Q = 0; ; ) {
-          var Ft = Bt(j);
+          var Ft = $t(j);
           if (!Ft)
             return M.length = Q, M;
           var fn = jt(Ft);
@@ -1170,7 +1170,7 @@ var Ut;
             M[Q] = fn;
           } catch (dn) {
             try {
-              $t(j);
+              Bt(j);
             } finally {
               throw dn;
             }
@@ -1179,7 +1179,7 @@ var Ut;
         }
       }
       function p(g, m, M) {
-        var E = f(
+        var E = d(
           m,
           M,
           /*Create*/
@@ -1195,23 +1195,23 @@ var Ut;
       }
     }
     function on(r) {
-      var i = r.defineMetadata, a = r.hasOwnMetadata, f = r.getOwnMetadata, b = r.getOwnMetadataKeys, D = r.deleteMetadata, F = new I(), C = {
+      var i = r.defineMetadata, a = r.hasOwnMetadata, d = r.getOwnMetadata, b = r.getOwnMetadataKeys, D = r.deleteMetadata, G = new I(), C = {
         isProviderFor: function(p, g) {
-          var m = F.get(p);
-          return !S(m) && m.has(g) ? !0 : b(p, g).length ? (S(m) && (m = new P(), F.set(p, m)), m.add(g), !0) : !1;
+          var m = G.get(p);
+          return !S(m) && m.has(g) ? !0 : b(p, g).length ? (S(m) && (m = new P(), G.set(p, m)), m.add(g), !0) : !1;
         },
         OrdinaryDefineOwnMetadata: i,
         OrdinaryHasOwnMetadata: a,
-        OrdinaryGetOwnMetadata: f,
+        OrdinaryGetOwnMetadata: d,
         OrdinaryOwnMetadataKeys: b,
         OrdinaryDeleteMetadata: D
       };
       return C;
     }
     function pe(r, i, a) {
-      var f = y.getProvider(r, i);
-      if (!S(f))
-        return f;
+      var d = y.getProvider(r, i);
+      if (!S(d))
+        return d;
       if (a) {
         if (y.setProvider(r, i, R))
           return R;
@@ -1242,7 +1242,7 @@ var Ut;
             return this._index >= 0 && (this._index = -1, this._keys = i, this._values = i), { value: p, done: !0 };
           }, C;
         }()
-      ), f = (
+      ), d = (
         /** @class */
         function() {
           function C() {
@@ -1283,7 +1283,7 @@ var Ut;
             if (g >= 0) {
               for (var m = this._keys.length, M = g + 1; M < m; M++)
                 this._keys[M - 1] = this._keys[M], this._values[M - 1] = this._values[M];
-              return this._keys.length--, this._values.length--, Ye(p, this._cacheKey) && (this._cacheKey = r, this._cacheIndex = -2), !0;
+              return this._keys.length--, this._values.length--, Qe(p, this._cacheKey) && (this._cacheKey = r, this._cacheIndex = -2), !0;
             }
             return !1;
           }, C.prototype.clear = function() {
@@ -1293,16 +1293,16 @@ var Ut;
           }, C.prototype.values = function() {
             return new a(this._keys, this._values, D);
           }, C.prototype.entries = function() {
-            return new a(this._keys, this._values, F);
+            return new a(this._keys, this._values, G);
           }, C.prototype["@@iterator"] = function() {
             return this.entries();
           }, C.prototype[c] = function() {
             return this.entries();
           }, C.prototype._find = function(p, g) {
-            if (!Ye(this._cacheKey, p)) {
+            if (!Qe(this._cacheKey, p)) {
               this._cacheIndex = -1;
               for (var m = 0; m < this._keys.length; m++)
-                if (Ye(this._keys[m], p)) {
+                if (Qe(this._keys[m], p)) {
                   this._cacheIndex = m;
                   break;
                 }
@@ -1311,14 +1311,14 @@ var Ut;
           }, C;
         }()
       );
-      return f;
+      return d;
       function b(C, p) {
         return C;
       }
       function D(C, p) {
         return p;
       }
-      function F(C, p) {
+      function G(C, p) {
         return [C, p];
       }
     }
@@ -1359,12 +1359,12 @@ var Ut;
       return r;
     }
     function un() {
-      var r = 16, i = l.create(), a = f();
+      var r = 16, i = l.create(), a = d();
       return (
         /** @class */
         function() {
           function p() {
-            this._key = f();
+            this._key = d();
           }
           return p.prototype.has = function(g) {
             var m = b(
@@ -1395,11 +1395,11 @@ var Ut;
             );
             return m !== void 0 ? delete m[this._key] : !1;
           }, p.prototype.clear = function() {
-            this._key = f();
+            this._key = d();
           }, p;
         }()
       );
-      function f() {
+      function d() {
         var p;
         do
           p = "@@WeakMap@@" + C();
@@ -1419,7 +1419,7 @@ var Ut;
           p[m] = Math.random() * 255 | 0;
         return p;
       }
-      function F(p) {
+      function G(p) {
         if (typeof Uint8Array == "function") {
           var g = new Uint8Array(p);
           return typeof crypto < "u" ? crypto.getRandomValues(g) : typeof msCrypto < "u" ? msCrypto.getRandomValues(g) : D(g, p), g;
@@ -1427,7 +1427,7 @@ var Ut;
         return D(new Array(p), p);
       }
       function C() {
-        var p = F(r);
+        var p = G(r);
         p[6] = p[6] & 79 | 64, p[8] = p[8] & 191 | 128;
         for (var g = "", m = 0; m < r; ++m) {
           var M = p[m];
@@ -1436,7 +1436,7 @@ var Ut;
         return g;
       }
     }
-    function Ke(r) {
+    function Ve(r) {
       return r.__ = void 0, delete r.__, r;
     }
   });
@@ -1453,10 +1453,10 @@ class it {
   }
   update() {
     var e, t, n, o, u;
-    (e = this.ScalarCmd) == null || e.forEach((c, d) => c.Index = d), (t = this.RotateCmd) == null || t.forEach((c, d) => c.Index = d), (n = this.LinearCmd) == null || n.forEach((c, d) => c.Index = d), (o = this.SensorReadCmd) == null || o.forEach((c, d) => c.Index = d), (u = this.SensorSubscribeCmd) == null || u.forEach((c, d) => c.Index = d);
+    (e = this.ScalarCmd) == null || e.forEach((c, f) => c.Index = f), (t = this.RotateCmd) == null || t.forEach((c, f) => c.Index = f), (n = this.LinearCmd) == null || n.forEach((c, f) => c.Index = f), (o = this.SensorReadCmd) == null || o.forEach((c, f) => c.Index = f), (u = this.SensorSubscribeCmd) == null || u.forEach((c, f) => c.Index = f);
   }
 }
-var ie = /* @__PURE__ */ ((s) => (s.Unknown = "Unknown", s.Vibrate = "Vibrate", s.Rotate = "Rotate", s.Oscillate = "Oscillate", s.Constrict = "Constrict", s.Inflate = "Inflate", s.Position = "Position", s))(ie || {}), re = /* @__PURE__ */ ((s) => (s.Unknown = "Unknown", s.Battery = "Battery", s.RSSI = "RSSI", s.Button = "Button", s.Pressure = "Pressure", s))(re || {});
+var ue = /* @__PURE__ */ ((s) => (s.Unknown = "Unknown", s.Vibrate = "Vibrate", s.Rotate = "Rotate", s.Oscillate = "Oscillate", s.Constrict = "Constrict", s.Inflate = "Inflate", s.Position = "Position", s))(ue || {}), re = /* @__PURE__ */ ((s) => (s.Unknown = "Unknown", s.Battery = "Battery", s.RSSI = "RSSI", s.Button = "Button", s.Pressure = "Pressure", s))(re || {});
 class xn {
   constructor(e) {
     this.Index = 0, Object.assign(this, e);
@@ -1513,7 +1513,7 @@ const ct = class ct extends K {
   }
 };
 ct.Name = "Ping";
-let et = ct;
+let tt = ct;
 var q = /* @__PURE__ */ ((s) => (s[s.ERROR_UNKNOWN = 0] = "ERROR_UNKNOWN", s[s.ERROR_INIT = 1] = "ERROR_INIT", s[s.ERROR_PING = 2] = "ERROR_PING", s[s.ERROR_MSG = 3] = "ERROR_MSG", s[s.ERROR_DEVICE = 4] = "ERROR_DEVICE", s))(q || {}), de;
 let se = (de = class extends K {
   constructor(e, t = 0, n = k) {
@@ -1541,10 +1541,10 @@ const ut = class ut extends K {
   }
 };
 ut.Name = "DeviceList";
-let Ee = ut;
+let Ae = ut;
 st([
   rt(() => ot)
-], Ee.prototype, "Devices");
+], Ae.prototype, "Devices");
 const ft = class ft extends he {
   constructor(e) {
     super(), Object.assign(this, e);
@@ -1564,69 +1564,69 @@ const dt = class dt extends he {
   }
 };
 dt.Name = "DeviceRemoved";
-let Ae = dt;
+let Ie = dt;
 const ht = class ht extends K {
   constructor(e = k) {
     super(e), this.Id = e;
   }
 };
 ht.Name = "RequestDeviceList";
-let Ie = ht;
+let Le = ht;
 const lt = class lt extends K {
   constructor(e = k) {
     super(e), this.Id = e;
   }
 };
 lt.Name = "StartScanning";
-let Le = lt;
+let Pe = lt;
 const pt = class pt extends K {
   constructor(e = k) {
     super(e), this.Id = e;
   }
 };
 pt.Name = "StopScanning";
-let Pe = pt;
+let Re = pt;
 const gt = class gt extends he {
   constructor() {
     super();
   }
 };
 gt.Name = "ScanningFinished";
-let Re = gt;
+let Te = gt;
 const yt = class yt extends K {
   constructor(e, t = 0, n = k) {
     super(n), this.ClientName = e, this.MessageVersion = t, this.Id = n;
   }
 };
 yt.Name = "RequestServerInfo";
-let Te = yt;
+let Ne = yt;
 const vt = class vt extends he {
   constructor(e, t, n, o = k) {
     super(), this.MessageVersion = e, this.MaxPingTime = t, this.ServerName = n, this.Id = o;
   }
 };
 vt.Name = "ServerInfo";
-let Ne = vt;
+let ke = vt;
 const mt = class mt extends X {
   constructor(e = -1, t = k) {
     super(e, t), this.DeviceIndex = e, this.Id = t;
   }
 };
 mt.Name = "StopDeviceCmd";
-let ke = mt;
+let De = mt;
 const wt = class wt extends K {
   constructor(e = k) {
     super(e), this.Id = e;
   }
 };
 wt.Name = "StopAllDevices";
-let De = wt;
-class qe {
+let je = wt;
+class Xe {
   constructor(e) {
     this.Index = e;
   }
 }
-class tt extends qe {
+class Ee extends Xe {
   constructor(e, t, n) {
     super(e), this.Scalar = t, this.ActuatorType = n;
   }
@@ -1638,12 +1638,12 @@ const Mt = class Mt extends X {
 };
 Mt.Name = "ScalarCmd";
 let me = Mt;
-class qt extends qe {
+class qt extends Xe {
   constructor(e, t, n) {
     super(e), this.Speed = t, this.Clockwise = n;
   }
 }
-const He = class He extends X {
+const Je = class Je extends X {
   constructor(e, t = -1, n = k) {
     super(t, n), this.Rotations = e, this.DeviceIndex = t, this.Id = n;
   }
@@ -1652,17 +1652,17 @@ const He = class He extends X {
     let o = 0;
     for (const [u, c] of t)
       n.push(new qt(o, u, c)), ++o;
-    return new He(n, e);
+    return new Je(n, e);
   }
 };
-He.Name = "RotateCmd";
-let we = He;
-class Xt extends qe {
+Je.Name = "RotateCmd";
+let we = Je;
+class Xt extends Xe {
   constructor(e, t, n) {
     super(e), this.Position = t, this.Duration = n;
   }
 }
-const Je = class Je extends X {
+const Ze = class Ze extends X {
   constructor(e, t = -1, n = k) {
     super(t, n), this.Vectors = e, this.DeviceIndex = t, this.Id = n;
   }
@@ -1671,18 +1671,18 @@ const Je = class Je extends X {
     let o = 0;
     for (const u of t)
       n.push(new Xt(o, u[0], u[1])), ++o;
-    return new Je(n, e);
+    return new Ze(n, e);
   }
 };
-Je.Name = "LinearCmd";
-let Me = Je;
+Ze.Name = "LinearCmd";
+let Me = Ze;
 const _t = class _t extends X {
   constructor(e, t, n, o = k) {
     super(e, o), this.DeviceIndex = e, this.SensorIndex = t, this.SensorType = n, this.Id = o;
   }
 };
 _t.Name = "SensorReadCmd";
-let je = _t;
+let $e = _t;
 const bt = class bt extends X {
   constructor(e, t, n, o, u = k) {
     super(e, u), this.DeviceIndex = e, this.SensorIndex = t, this.SensorType = n, this.Data = o, this.Id = u;
@@ -1696,79 +1696,79 @@ const St = class St extends X {
   }
 };
 St.Name = "RawReadCmd";
-let $e = St;
+let Fe = St;
 const xt = class xt extends X {
   constructor(e, t, n, o, u = k) {
     super(e, u), this.DeviceIndex = e, this.Endpoint = t, this.Data = n, this.WriteWithResponse = o, this.Id = u;
   }
 };
 xt.Name = "RawWriteCmd";
-let Fe = xt;
+let Ge = xt;
 const Ot = class Ot extends X {
   constructor(e, t, n = k) {
     super(e, n), this.DeviceIndex = e, this.Endpoint = t, this.Id = n;
   }
 };
 Ot.Name = "RawSubscribeCmd";
-let Ge = Ot;
+let We = Ot;
 const Ct = class Ct extends X {
   constructor(e, t, n = k) {
     super(e, n), this.DeviceIndex = e, this.Endpoint = t, this.Id = n;
   }
 };
 Ct.Name = "RawUnsubscribeCmd";
-let We = Ct;
+let Ue = Ct;
 const Et = class Et extends X {
   constructor(e, t, n, o = k) {
     super(e, o), this.DeviceIndex = e, this.Endpoint = t, this.Data = n, this.Id = o;
   }
 };
 Et.Name = "RawReading";
-let Ue = Et;
+let ze = Et;
 const En = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  ActuatorType: ie,
+  ActuatorType: ue,
   ButtplugDeviceMessage: X,
   ButtplugMessage: K,
   ButtplugSystemMessage: he,
   DEFAULT_MESSAGE_ID: k,
   DeviceAdded: ve,
   DeviceInfo: ot,
-  DeviceList: Ee,
-  DeviceRemoved: Ae,
+  DeviceList: Ae,
+  DeviceRemoved: Ie,
   Error: se,
   ErrorClass: q,
   GenericDeviceMessageAttributes: xn,
-  GenericMessageSubcommand: qe,
+  GenericMessageSubcommand: Xe,
   LinearCmd: Me,
   MAX_ID: Sn,
   MESSAGE_SPEC_VERSION: Ce,
   MessageAttributes: it,
   Ok: ye,
-  Ping: et,
+  Ping: tt,
   RawDeviceMessageAttributes: On,
-  RawReadCmd: $e,
-  RawReading: Ue,
-  RawSubscribeCmd: Ge,
-  RawUnsubscribeCmd: We,
-  RawWriteCmd: Fe,
-  RequestDeviceList: Ie,
-  RequestServerInfo: Te,
+  RawReadCmd: Fe,
+  RawReading: ze,
+  RawSubscribeCmd: We,
+  RawUnsubscribeCmd: Ue,
+  RawWriteCmd: Ge,
+  RequestDeviceList: Le,
+  RequestServerInfo: Ne,
   RotateCmd: we,
   RotateSubcommand: qt,
   SYSTEM_MESSAGE_ID: te,
   ScalarCmd: me,
-  ScalarSubcommand: tt,
-  ScanningFinished: Re,
+  ScalarSubcommand: Ee,
+  ScanningFinished: Te,
   SensorDeviceMessageAttributes: Cn,
-  SensorReadCmd: je,
+  SensorReadCmd: $e,
   SensorReading: Be,
   SensorType: re,
-  ServerInfo: Ne,
-  StartScanning: Le,
-  StopAllDevices: De,
-  StopDeviceCmd: ke,
-  StopScanning: Pe,
+  ServerInfo: ke,
+  StartScanning: Pe,
+  StopAllDevices: je,
+  StopDeviceCmd: De,
+  StopScanning: Re,
   VectorSubcommand: Xt
 }, Symbol.toStringTag, { value: "Module" }));
 /*!
@@ -1800,7 +1800,7 @@ class H extends Error {
   static FromError(e) {
     switch (e.ErrorCode) {
       case q.ERROR_DEVICE:
-        return new G(e.ErrorMessage, e.Id);
+        return new B(e.ErrorMessage, e.Id);
       case q.ERROR_INIT:
         return new nt(e.ErrorMessage, e.Id);
       case q.ERROR_UNKNOWN:
@@ -1819,7 +1819,7 @@ class nt extends H {
     super(e, q.ERROR_INIT, t);
   }
 }
-class G extends H {
+class B extends H {
   constructor(e, t = te) {
     super(e, q.ERROR_DEVICE, t);
   }
@@ -1845,7 +1845,7 @@ function Yt(s) {
       return e;
   return null;
 }
-function oe(s) {
+function ie(s) {
   return Yt(Object.getPrototypeOf(s).constructor.Name);
 }
 function zt(s) {
@@ -1862,7 +1862,7 @@ function zt(s) {
   }
   return t;
 }
-class ze extends Ze {
+class He extends qe {
   /**
    * @param _index Index of the device, as created by the device manager.
    * @param _name Name of the device.
@@ -1902,14 +1902,14 @@ class ze extends Ze {
     return this._deviceInfo.DeviceMessages;
   }
   static fromMsg(e, t) {
-    return new ze(e, t);
+    return new He(e, t);
   }
   async send(e) {
     return await this._sendClosure(this, e);
   }
   async sendExpectOk(e) {
     const t = await this.send(e);
-    switch (oe(t)) {
+    switch (ie(t)) {
       case ye:
         return;
       case se:
@@ -1926,25 +1926,37 @@ class ze extends Ze {
   async scalarCommandBuilder(e, t, n) {
     var c;
     const o = (c = this.messageAttributes.ScalarCmd) == null ? void 0 : c.filter(
-      (d) => d.ActuatorType === t
+      (f) => f.ActuatorType === t
     );
     if (!o || o.length === 0)
-      throw new G(
+      throw new B(
         `Device ${this.name} has no ${t} capabilities`
       );
     const u = [];
     if (typeof e == "number")
-      u.push(new tt(n ?? 0, e, t));
+      if (n !== void 0) {
+        if (n >= o.length)
+          throw new B(
+            `Index ${n} out of range for device ${this.name} with ${o.length} ${t} actuators`
+          );
+        o.forEach(
+          (f) => (
+            //push to all actuators when a single unindexed value is sent
+            u.push(new Ee(f.Index, e, t))
+          )
+        );
+      } else
+        u.push(new Ee(n ?? 0, e, t));
     else if (Array.isArray(e)) {
       if (e.length > o.length)
-        throw new G(
+        throw new B(
           `${e.length} commands send to a device with ${o.length} vibrators`
         );
-      o.forEach((d, v) => {
-        u.push(new tt(d.Index, e[v], t));
+      o.forEach((f, v) => {
+        u.push(new Ee(f.Index, e[v], t));
       });
     } else
-      throw new G(
+      throw new B(
         `${t} can only take numbers or arrays of numbers.`
       );
     await this.scalar(u);
@@ -1952,20 +1964,20 @@ class ze extends Ze {
   get vibrateAttributes() {
     var e;
     return ((e = this.messageAttributes.ScalarCmd) == null ? void 0 : e.filter(
-      (t) => t.ActuatorType === ie.Vibrate
+      (t) => t.ActuatorType === ue.Vibrate
     )) ?? [];
   }
-  async vibrate(e) {
-    await this.scalarCommandBuilder(e, ie.Vibrate);
+  async vibrate(e, t) {
+    await this.scalarCommandBuilder(e, ue.Vibrate, t);
   }
   get oscillateAttributes() {
     var e;
     return ((e = this.messageAttributes.ScalarCmd) == null ? void 0 : e.filter(
-      (t) => t.ActuatorType === ie.Oscillate
+      (t) => t.ActuatorType === ue.Oscillate
     )) ?? [];
   }
   async oscillate(e, t) {
-    await this.scalarCommandBuilder(e, ie.Oscillate, t);
+    await this.scalarCommandBuilder(e, ue.Oscillate, t);
   }
   get rotateAttributes() {
     return this.messageAttributes.RotateCmd ?? [];
@@ -1973,7 +1985,7 @@ class ze extends Ze {
   async rotate(e, t) {
     const n = this.messageAttributes.RotateCmd;
     if (!n || n.length === 0)
-      throw new G(
+      throw new B(
         `Device ${this.name} has no Rotate capabilities`
       );
     let o;
@@ -1985,43 +1997,39 @@ class ze extends Ze {
     else if (Array.isArray(e))
       o = we.Create(this.index, e);
     else
-      throw new G(
+      throw new B(
         "SendRotateCmd can only take a number and boolean, or an array of number/boolean tuples"
       );
     await this.sendExpectOk(o);
   }
   get linearAttributes() {
-    var e;
-    return ((e = this.messageAttributes.ScalarCmd) == null ? void 0 : e.filter(
-      (t) => t.ActuatorType === ie.Position
-    )) ?? [];
+    return this.messageAttributes.LinearCmd ?? [];
   }
   async linear(e, t) {
-    const n = this.linearAttributes;
+    const n = this.messageAttributes.LinearCmd;
     if (!n || n.length === 0)
-      throw new G(
+      throw new B(
         `Device ${this.name} has no Linear capabilities`
       );
     let o;
-    if (typeof e == "number") {
-      const u = t !== void 0 ? [e, t] : e;
+    if (typeof e == "number")
       o = Me.Create(
         this.index,
-        new Array(n.length).fill(u)
+        new Array(n.length).fill([e, t])
       );
-    } else if (Array.isArray(e))
+    else if (Array.isArray(e))
       o = Me.Create(this.index, e);
     else
-      throw new G(
+      throw new B(
         "SendLinearCmd can only take a number and number, or an array of number/number tuples"
       );
     await this.sendExpectOk(o);
   }
   async sensorRead(e, t) {
     const n = await this.send(
-      new je(this.index, e, t)
+      new $e(this.index, e, t)
     );
-    switch (oe(n)) {
+    switch (ie(n)) {
       case Be:
         return n.Data;
       case se:
@@ -2042,7 +2050,7 @@ class ze extends Ze {
   async battery() {
     var n;
     if (!this.hasBattery)
-      throw new G(
+      throw new B(
         `Device ${this.name} has no Battery capabilities`
       );
     const e = (n = this.messageAttributes.SensorReadCmd) == null ? void 0 : n.filter(
@@ -2063,7 +2071,7 @@ class ze extends Ze {
   async rssi() {
     var n;
     if (!this.hasRssi)
-      throw new G(
+      throw new B(
         `Device ${this.name} has no RSSI capabilities`
       );
     const e = (n = this.messageAttributes.SensorReadCmd) == null ? void 0 : n.filter(
@@ -2076,18 +2084,18 @@ class ze extends Ze {
   }
   async rawRead(e, t, n) {
     if (!this.messageAttributes.RawReadCmd)
-      throw new G(
+      throw new B(
         `Device ${this.name} has no raw read capabilities`
       );
     if (this.messageAttributes.RawReadCmd.Endpoints.indexOf(e) === -1)
-      throw new G(
+      throw new B(
         `Device ${this.name} has no raw readable endpoint ${e}`
       );
     const o = await this.send(
-      new $e(this.index, e, t, n)
+      new Fe(this.index, e, t, n)
     );
-    switch (oe(o)) {
-      case Ue:
+    switch (ie(o)) {
+      case ze:
         return new Uint8Array(o.Data);
       case se:
         throw H.FromError(o);
@@ -2099,43 +2107,43 @@ class ze extends Ze {
   }
   async rawWrite(e, t, n) {
     if (!this.messageAttributes.RawWriteCmd)
-      throw new G(
+      throw new B(
         `Device ${this.name} has no raw write capabilities`
       );
     if (this.messageAttributes.RawWriteCmd.Endpoints.indexOf(e) === -1)
-      throw new G(
+      throw new B(
         `Device ${this.name} has no raw writable endpoint ${e}`
       );
     await this.sendExpectOk(
-      new Fe(this.index, e, t, n)
+      new Ge(this.index, e, t, n)
     );
   }
   async rawSubscribe(e) {
     if (!this.messageAttributes.RawSubscribeCmd)
-      throw new G(
+      throw new B(
         `Device ${this.name} has no raw subscribe capabilities`
       );
     if (this.messageAttributes.RawSubscribeCmd.Endpoints.indexOf(e) === -1)
-      throw new G(
+      throw new B(
         `Device ${this.name} has no raw subscribable endpoint ${e}`
       );
-    await this.sendExpectOk(new Ge(this.index, e));
+    await this.sendExpectOk(new We(this.index, e));
   }
   async rawUnsubscribe(e) {
     if (!this.messageAttributes.RawSubscribeCmd)
-      throw new G(
+      throw new B(
         `Device ${this.name} has no raw unsubscribe capabilities`
       );
     if (this.messageAttributes.RawSubscribeCmd.Endpoints.indexOf(e) === -1)
-      throw new G(
+      throw new B(
         `Device ${this.name} has no raw unsubscribable endpoint ${e}`
       );
     await this.sendExpectOk(
-      new We(this.index, e)
+      new Ue(this.index, e)
     );
   }
   async stop() {
-    await this.sendExpectOk(new ke(this.index));
+    await this.sendExpectOk(new De(this.index));
   }
   emitDisconnected() {
     this.emit("deviceremoved");
@@ -2193,35 +2201,35 @@ class Pn extends H {
     super(e, q.ERROR_UNKNOWN);
   }
 }
-class kn extends Ze {
+class kn extends qe {
   constructor(e = "Generic Buttplug Client") {
-    super(), this._pingTimer = null, this._connector = null, this._devices = /* @__PURE__ */ new Map(), this._logger = Ve.Logger, this._isScanning = !1, this._sorter = new Ln(!0), this.connect = async (t) => {
+    super(), this._pingTimer = null, this._connector = null, this._devices = /* @__PURE__ */ new Map(), this._logger = et.Logger, this._isScanning = !1, this._sorter = new Ln(!0), this.connect = async (t) => {
       this._logger.Info(
         `ButtplugClient: Connecting using ${t.constructor.name}`
       ), await t.connect(), this._connector = t, this._connector.addListener("message", this.parseMessages), this._connector.addListener("disconnect", this.disconnectHandler), await this.initializeConnection();
     }, this.disconnect = async () => {
       this._logger.Debug("ButtplugClient: Disconnect called"), this.checkConnector(), await this.shutdownConnection(), await this._connector.disconnect();
     }, this.startScanning = async () => {
-      this._logger.Debug("ButtplugClient: StartScanning called"), this._isScanning = !0, await this.sendMsgExpectOk(new Le());
+      this._logger.Debug("ButtplugClient: StartScanning called"), this._isScanning = !0, await this.sendMsgExpectOk(new Pe());
     }, this.stopScanning = async () => {
-      this._logger.Debug("ButtplugClient: StopScanning called"), this._isScanning = !1, await this.sendMsgExpectOk(new Pe());
+      this._logger.Debug("ButtplugClient: StopScanning called"), this._isScanning = !1, await this.sendMsgExpectOk(new Re());
     }, this.stopAllDevices = async () => {
-      this._logger.Debug("ButtplugClient: StopAllDevices"), await this.sendMsgExpectOk(new De());
+      this._logger.Debug("ButtplugClient: StopAllDevices"), await this.sendMsgExpectOk(new je());
     }, this.disconnectHandler = () => {
       this._logger.Info("ButtplugClient: Disconnect event receieved."), this.emit("disconnect");
     }, this.parseMessages = (t) => {
       const n = this._sorter.ParseIncomingMessages(t);
       for (const o of n)
-        switch (oe(o)) {
+        switch (ie(o)) {
           case ve: {
-            const u = o, c = ze.fromMsg(
+            const u = o, c = He.fromMsg(
               u,
               this.sendDeviceMessageClosure
             );
             this._devices.set(u.DeviceIndex, c), this.emit("deviceadded", c);
             break;
           }
-          case Ae: {
+          case Ie: {
             const u = o;
             if (this._devices.has(u.DeviceIndex)) {
               const c = this._devices.get(u.DeviceIndex);
@@ -2229,20 +2237,20 @@ class kn extends Ze {
             }
             break;
           }
-          case Re:
+          case Te:
             this._isScanning = !1, this.emit("scanningfinished", o);
             break;
         }
     }, this.initializeConnection = async () => {
       this.checkConnector();
       const t = await this.sendMessage(
-        new Te(
+        new Ne(
           this._clientName,
           Ce
         )
       );
-      switch (oe(t)) {
-        case Ne: {
+      switch (ie(t)) {
+        case ke: {
           const n = t;
           if (this._logger.Info(
             `ButtplugClient: Connected to Server ${n.ServerName}`
@@ -2267,12 +2275,12 @@ class kn extends Ze {
       return !1;
     }, this.requestDeviceList = async () => {
       this.checkConnector(), this._logger.Debug("ButtplugClient: ReceiveDeviceList called"), (await this.sendMessage(
-        new Ie()
+        new Le()
       )).Devices.forEach((n) => {
         if (this._devices.has(n.DeviceIndex))
           this._logger.Debug(`ButtplugClient: Device already added: ${n}`);
         else {
-          const o = ze.fromMsg(
+          const o = He.fromMsg(
             n,
             this.sendDeviceMessageClosure
           );
@@ -2283,7 +2291,7 @@ class kn extends Ze {
       await this.stopAllDevices(), this._pingTimer !== null && (clearInterval(this._pingTimer), this._pingTimer = null);
     }, this.sendMsgExpectOk = async (t) => {
       const n = await this.sendMessage(t);
-      switch (oe(n)) {
+      switch (ie(n)) {
         case ye:
           return;
         case se:
@@ -2292,7 +2300,7 @@ class kn extends Ze {
           throw H.LogAndError(
             ge,
             this._logger,
-            `Message type ${oe(n).constructor} not handled by SendMsgExpectOk`
+            `Message type ${ie(n).constructor} not handled by SendMsgExpectOk`
           );
       }
     }, this.sendDeviceMessageClosure = async (t, n) => await this.sendDeviceMessage(t, n), this._clientName = e, this._logger.Debug(`ButtplugClient: Client ${e} created.`);
@@ -2313,7 +2321,7 @@ class kn extends Ze {
   async sendDeviceMessage(e, t) {
     if (this.checkConnector(), this._devices.get(e.index) === void 0)
       throw H.LogAndError(
-        G,
+        B,
         this._logger,
         `Device ${e.index} not available.`
       );
@@ -2331,20 +2339,20 @@ class kn extends Ze {
       );
   }
 }
-class Rn extends Ze {
+class Rn extends qe {
   constructor(e) {
     super(), this._url = e, this._websocketConstructor = null, this.connect = async () => new Promise((t, n) => {
-      const o = new (this._websocketConstructor ?? WebSocket)(this._url), u = (d) => {
-        n(d);
-      }, c = (d) => n(d.reason);
+      const o = new (this._websocketConstructor ?? WebSocket)(this._url), u = (f) => {
+        n(f);
+      }, c = (f) => n(f.reason);
       o.addEventListener("open", async () => {
         this._ws = o;
         try {
-          await this.initialize(), this._ws.addEventListener("message", (d) => {
-            this.parseIncomingMessage(d);
+          await this.initialize(), this._ws.addEventListener("message", (f) => {
+            this.parseIncomingMessage(f);
           }), this._ws.removeEventListener("close", c), this._ws.removeEventListener("error", u), this._ws.addEventListener("close", this.disconnect), t();
-        } catch (d) {
-          n(d);
+        } catch (f) {
+          n(f);
         }
       }), o.addEventListener("error", u), o.addEventListener("close", c);
     }), this.disconnect = async () => {
@@ -2390,17 +2398,17 @@ class Dn extends Tn {
   }
 }
 export {
-  ie as ActuatorType,
+  ue as ActuatorType,
   Tn as ButtplugBrowserWebsocketClientConnector,
   kn as ButtplugClient,
   Pn as ButtplugClientConnectorException,
-  ze as ButtplugClientDevice,
-  G as ButtplugDeviceError,
+  He as ButtplugClientDevice,
+  B as ButtplugDeviceError,
   X as ButtplugDeviceMessage,
   H as ButtplugError,
   nt as ButtplugInitError,
   Jt as ButtplugLogLevel,
-  Ve as ButtplugLogger,
+  et as ButtplugLogger,
   K as ButtplugMessage,
   ge as ButtplugMessageError,
   Ln as ButtplugMessageSorter,
@@ -2411,43 +2419,43 @@ export {
   k as DEFAULT_MESSAGE_ID,
   ve as DeviceAdded,
   ot as DeviceInfo,
-  Ee as DeviceList,
-  Ae as DeviceRemoved,
+  Ae as DeviceList,
+  Ie as DeviceRemoved,
   se as Error,
   q as ErrorClass,
   xn as GenericDeviceMessageAttributes,
-  qe as GenericMessageSubcommand,
+  Xe as GenericMessageSubcommand,
   Me as LinearCmd,
   pn as LogMessage,
   Sn as MAX_ID,
   Ce as MESSAGE_SPEC_VERSION,
   it as MessageAttributes,
   ye as Ok,
-  et as Ping,
+  tt as Ping,
   On as RawDeviceMessageAttributes,
-  $e as RawReadCmd,
-  Ue as RawReading,
-  Ge as RawSubscribeCmd,
-  We as RawUnsubscribeCmd,
-  Fe as RawWriteCmd,
-  Ie as RequestDeviceList,
-  Te as RequestServerInfo,
+  Fe as RawReadCmd,
+  ze as RawReading,
+  We as RawSubscribeCmd,
+  Ue as RawUnsubscribeCmd,
+  Ge as RawWriteCmd,
+  Le as RequestDeviceList,
+  Ne as RequestServerInfo,
   we as RotateCmd,
   qt as RotateSubcommand,
   te as SYSTEM_MESSAGE_ID,
   me as ScalarCmd,
-  tt as ScalarSubcommand,
-  Re as ScanningFinished,
+  Ee as ScalarSubcommand,
+  Te as ScanningFinished,
   Cn as SensorDeviceMessageAttributes,
-  je as SensorReadCmd,
+  $e as SensorReadCmd,
   Be as SensorReading,
   re as SensorType,
-  Ne as ServerInfo,
-  Le as StartScanning,
-  De as StopAllDevices,
-  ke as StopDeviceCmd,
-  Pe as StopScanning,
+  ke as ServerInfo,
+  Pe as StartScanning,
+  je as StopAllDevices,
+  De as StopDeviceCmd,
+  Re as StopScanning,
   Xt as VectorSubcommand,
   zt as fromJSON,
-  oe as getMessageClassFromMessage
+  ie as getMessageClassFromMessage
 };
