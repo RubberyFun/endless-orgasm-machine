@@ -123,7 +123,6 @@ void orgasm_control_set_pleasure(uint8_t pleasure) {
 
 void orgasm_control_init(void) {
     eom_hal_init_pressure_sensor();
-    eom_hal_set_sensor_sensitivity(Config.sensor_sensitivity);
     output_state.output_mode = OC_AUTOMATIC;
     output_state.vibration_mode = Config.vibration_mode;
     output_state.edge_time_out = 10000;

@@ -30,7 +30,7 @@ Here is a quick summary of config variables:
 |`sensitivity_threshold`|12 bit Int (4096)|1024|The arousal threshold for orgasm detection. Lower values stop sooner.|
 |`mid_threshold`|12 bit Int (4096)|512| The start of the warning zone for approaching arousal.  Changes lights to yellow.|
 |`update_frequency_hz`|Int|50|Update frequency for pressure readings and arousal steps. Higher = crash your serial monitor.|
-|`sensor_sensitivity`|Byte|128|Analog pressure prescaling. Please see instruction manual.|
+|`sensor_sensitivity`|Byte|128|Pressure sensor prescaling.|
 |`use_average_values`|Boolean|false|Use average values when calculating arousal. This smooths noisy data.|
 |`vibration_mode`|VibrationMode|RampStop|Vibration Mode for main vibrator control.|
 |`use_post_orgasm`|Boolean|false|Use post-orgasm torture mode and functionality.|

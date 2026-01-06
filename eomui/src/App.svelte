@@ -245,9 +245,9 @@
       description: "Update frequency for pressure readings and arousal steps.",
     },
     sensor_sensitivity: {
-      value: 3,
+      value: 50,
       min: 0,
-      max: 3,
+      max: 100,
       label: "Sensor Sensitivity",
       type: "%",
       description: "Analog pressure sensor prescaling. Higher values are more sensitive.",
@@ -336,6 +336,7 @@
 
   let mainSettings: string[] = [
     "sensitivity_threshold",
+    "sensor_sensitivity",
     "motor_ramp_time_s",
     "edge_delay",
     "chart_window_s",
@@ -345,7 +346,6 @@
     //"wifi_on",
     "max_denied",
     "max_additional_delay",
-    "sensor_sensitivity",
     "max_pleasure",
     "mid_threshold",
     "initial_pleasure",

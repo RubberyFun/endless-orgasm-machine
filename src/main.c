@@ -153,7 +153,7 @@ esp_err_t run_boot_diagnostic(void) {
 }
 
 void app_main() {
-    esp_log_level_set(TAG, ESP_LOG_DEBUG);
+    //esp_log_level_set(TAG, ESP_LOG_DEBUG);
     TickType_t boot_tick = xTaskGetTickCount();
 
     esp_err_t ret = nvs_flash_init();

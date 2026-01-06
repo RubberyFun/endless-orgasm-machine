@@ -2,3 +2,5 @@ dependencies:
   idf: ">=5.0"
   espressif/mdns: ">=1.2.0"
   espressif/led_strip: ">=3.0.1"
+  # esp-idf-lib/hx711: ">=1.0.0"
+  # esp-idf-lib/esp_idf_lib_helpers: ">=1.0.0"

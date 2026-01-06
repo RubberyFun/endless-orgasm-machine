@@ -11,19 +11,36 @@
 #include "esp_log.h"
 #include "led_strip.h"
 #include "esp_timer.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#if PRESSURE_SENSOR == PRESSURE_SENSOR_I2C
+    #include "driver/i2c_master.h"
+    #if PRESSURE_SENSOR_HARDWARE == PRESSURE_SENSOR_HARDWARE_MPR
+        #include "components/mpr_pressure_sensor.h"
+    #endif
+#elif PRESSURE_SENSOR == PRESSURE_SENSOR_SPI
+    // #include "driver/spi_master.h"
+    #include "hx711.h"
+    hx711_t dev =
+    {
+        .dout = PRESSURE_SDA,
+        .pd_sck = PRESSURE_SCK,
+        .gain = HX711_GAIN_A_128
+    };
+#else
+    //analog
 
+#endif
 static const char* TAG = "HAL";
 
-uint8_t pressure_ambient = DEFAULT_AMBIENT_RESSURE;
-uint8_t pressure_sensitivity = DEFAULT_PRESSURE_SENSITIVITY;  //this scales 0-3 corresponding to the native ESP32 ADC attenuation levels
-
-adc_oneshot_unit_handle_t adc1_handle;
-adc_oneshot_unit_init_cfg_t adc1_init_cfg = {
-    .unit_id = ADC_UNIT_1,
+adc_oneshot_unit_handle_t adc_handle;
+adc_oneshot_unit_init_cfg_t adc_init_cfg = {
+    .unit_id = ADC_UNIT,
     .ulp_mode = ADC_ULP_MODE_DISABLE,
 };
+i2c_master_dev_handle_t dev_handle;
 
-led_strip_handle_t led_strip = NULL;
+uint8_t pressure_ambient = DEFAULT_AMBIENT_PRESSURE;  //is this necessary?
 RGBColor led_color = {0, 0, 0};
 RGBColor rgb_off = {0, 0, 0};
 RGBColor rgb_white = {255, 255, 255};
@@ -33,6 +50,8 @@ RGBColor rgb_blue = {0, 0, 255};
 RGBColor rgb_orange = {255, 130, 0}; //255, 185, 59
 RGBColor rgb_yellow = {255, 230, 0}; //255,240,133
 RGBColor rgb_purple = {80, 0, 150}; // 179, 0, 255
+
+led_strip_handle_t led_strip = NULL;
 uint8_t is_flashing = 0;
 uint8_t flash_on = 0;
 unsigned long last_flash = 0;
@@ -51,42 +70,132 @@ uint16_t flash_interval = 250;
     };
 #endif
 
-uint16_t eom_hal_get_pressure_reading(void) {
-    int raw = 0;
 
-    adc_oneshot_read(adc1_handle, PRESSURE_GPIO, &raw);  
+void eom_hal_init_pressure_sensor(void) {
+    if (PRESSURE_SENSOR == PRESSURE_SENSOR_ANALOG) {
 
-    //ESP_LOGI(TAG, "Pressure raw: %d", raw);
-    int adjusted = raw - pressure_ambient;
-    if (adjusted < 0) {
-        adjusted = 0;
+        gpio_reset_pin(PRESSURE_GPIO);
+
+        adc_atten_t esp_sensitivity = Config.sensor_sensitivity >= 75 ? ADC_ATTEN_DB_0 
+                                    : (Config.sensor_sensitivity >= 50 ? ADC_ATTEN_DB_2_5 
+                                    : (Config.sensor_sensitivity >= 25 ? ADC_ATTEN_DB_6 
+                                    : ADC_ATTEN_DB_12));
+        adc_oneshot_chan_cfg_t adcCfg = {
+            .bitwidth = ADC_BITWIDTH_12,
+            .atten = esp_sensitivity,
+        };
+
+        adc_oneshot_new_unit(&adc_init_cfg, &adc_handle);
+        ESP_ERROR_CHECK(adc_oneshot_config_channel(adc_handle, PRESSURE_GPIO, &adcCfg));
+
         eom_hal_setup_pressure_ambient();
-    }
 
-    //adjusted *= pressure_sensitivity;  //if we go the software multiplier route
-    if (adjusted > EOM_HAL_PRESSURE_MAX) adjusted = EOM_HAL_PRESSURE_MAX;
-    return (uint16_t)adjusted;
+    } else if (PRESSURE_SENSOR == PRESSURE_SENSOR_I2C) {
+
+        // Reset GPIO pins to ensure clean state before I2C initialization
+        gpio_reset_pin(PRESSURE_SDA);
+        gpio_reset_pin(PRESSURE_SCK);
+
+        i2c_master_bus_config_t i2c_mst_config = {
+            .clk_source = I2C_CLK_SRC_DEFAULT,
+            .i2c_port = I2C_NUM_0,
+            .scl_io_num = PRESSURE_SCK,
+            .sda_io_num = PRESSURE_SDA,
+            .glitch_ignore_cnt = 7,
+            .flags.enable_internal_pullup = true,
+        };
+        
+        i2c_master_bus_handle_t bus_handle;
+        ESP_ERROR_CHECK(i2c_new_master_bus(&i2c_mst_config, &bus_handle));
+        
+        ESP_LOGI(TAG, "I2C master bus initialized on SDA:%d SCL:%d", PRESSURE_SDA, PRESSURE_SCK);
+        
+        // Scan I2C bus to verify sensor is present
+        mpr_scan_i2c_bus(bus_handle);
+        
+        i2c_device_config_t dev_cfg;
+        mpr_dev_config(&dev_cfg);  //not going to bother with device selection yet, just MPR for now
+
+        ESP_ERROR_CHECK(i2c_master_bus_add_device(bus_handle, &dev_cfg, &dev_handle));
+
+    } else if (PRESSURE_SENSOR == PRESSURE_SENSOR_SPI) {
+        //SPI support eventually?
+    }
+}
+
+
+uint16_t eom_hal_get_pressure_reading(void) {
+    if (PRESSURE_SENSOR == PRESSURE_SENSOR_ANALOG) {
+
+        int raw = 0;
+        
+        adc_oneshot_read(adc_handle, PRESSURE_GPIO, &raw);  
+        
+        int adjusted = raw - pressure_ambient;
+        if (adjusted < 0) {
+            adjusted = 0;
+            eom_hal_setup_pressure_ambient();
+        }
+        
+        //adjusted *= pressure_sensitivity;  //if we go the software multiplier route
+        if (adjusted > EOM_HAL_PRESSURE_MAX) adjusted = EOM_HAL_PRESSURE_MAX;
+        return (uint16_t)adjusted;
+
+    } else if (PRESSURE_SENSOR == PRESSURE_SENSOR_I2C) {     
+        int32_t data = 0;
+        esp_err_t r = 0;
+
+        r = mpr_read_pressure(dev_handle, &data);
+
+        if (r != ESP_OK)
+        {
+            ESP_LOGE(TAG, "Could not read data: %d (%s)\n", r, esp_err_to_name(r));
+            return 0;
+        }
+
+        int32_t adjusted = data - pressure_ambient;
+        if (adjusted < 0) {
+            adjusted = 0;
+        }
+        
+        //MPR range 24 bit (0xFFFFFF)...EOM logic expects 12 bit
+        uint16_t scaled = (uint16_t)(adjusted >> 12);
+        scaled = (scaled * (Config.sensor_sensitivity / 100.0 * PRESSURE_MULTIPLIER));
+        if (scaled > EOM_HAL_PRESSURE_MAX) scaled = EOM_HAL_PRESSURE_MAX;
+        ESP_LOGI(TAG, "12bit: %d Raw data: %" PRIi32, scaled, data);
+        return scaled;
+
+
+    } else {
+        // HX711 isnt technically I2C or SPI but....
+        // hx711_read_average(&dev, 10, &data);
+        //r = hx711_read(&dev, &data);
+
+        // if (r != ESP_OK)
+        // {
+        //     ESP_LOGE(TAG, "Could not read data: %d (%s)\n", r, esp_err_to_name(r));
+        //     return 0;
+        // }
+        // HX711 returns signed 24-bit value, adjust for ambient and scale to 12-bit range
+        // int32_t adjusted = data - pressure_ambient;
+        // if (adjusted < 0) {
+        //     adjusted = 0;
+        // }
+        
+        // Scale from HX711 range to our 12-bit range
+        // Assuming typical HX711 range of ±8388607 (0x7FFFFF)
+        // int32_t adjusted = (adjusted * EOM_HAL_PRESSURE_MAX) / 8388607;
+        
+        // if (adjusted > EOM_HAL_PRESSURE_MAX) adjusted = EOM_HAL_PRESSURE_MAX;
+        
+        // ESP_LOGE(TAG, "12bit: %d Raw data: %" PRIi32, adjusted, data);
+        // return (uint16_t)adjusted;
+    }
+    return 0;
 }
 
 uint8_t eom_hal_get_sensor_sensitivity(void) {
-    return pressure_sensitivity; 
-}
-
-void eom_hal_init_pressure_sensor(void) {
-    // ESP_ERROR_CHECK(adc1_config_width(ADC_BITWIDTH_12));
-
-    adc_atten_t esp_sensitivity = Config.sensor_sensitivity >= 3 ? ADC_ATTEN_DB_0 
-                                : (Config.sensor_sensitivity == 2 ? ADC_ATTEN_DB_2_5 
-                                : (Config.sensor_sensitivity == 1 ? ADC_ATTEN_DB_6 
-                                : ADC_ATTEN_DB_12));
-    adc_oneshot_chan_cfg_t adcCfg = {
-        .bitwidth = ADC_BITWIDTH_12,
-        .atten = esp_sensitivity,
-    };
-    adc_oneshot_new_unit(&adc1_init_cfg, &adc1_handle);
-    ESP_ERROR_CHECK(adc_oneshot_config_channel(adc1_handle, PRESSURE_GPIO, &adcCfg));
-
-    eom_hal_setup_pressure_ambient();
+    return Config.sensor_sensitivity; 
 }
 
 void eom_hal_setup_pressure_ambient(void) {
@@ -103,26 +212,21 @@ void eom_hal_setup_pressure_ambient(void) {
 }
 
 void eom_hal_set_sensor_sensitivity(uint8_t sensitivity) {
-    pressure_sensitivity = sensitivity;
-
-    if (adc1_handle == NULL) return; //not initialized yet
-
-    adc_atten_t esp_sensitivity = sensitivity >= 3 ? ADC_ATTEN_DB_0 
-                                : (sensitivity == 2 ? ADC_ATTEN_DB_2_5 
-                                : (sensitivity == 1 ? ADC_ATTEN_DB_6 
-                                : ADC_ATTEN_DB_12));
-    adc_oneshot_chan_cfg_t adcCfg = {
-        .bitwidth = ADC_BITWIDTH_12,
-        .atten = esp_sensitivity,
+    if (PRESSURE_SENSOR == PRESSURE_SENSOR_ANALOG) {
+        if (adc_handle == NULL) return; //not initialized yet
+        
+        adc_atten_t esp_sensitivity = sensitivity >= 75 ? ADC_ATTEN_DB_0 
+                                    : (sensitivity >= 50 ? ADC_ATTEN_DB_2_5 
+                                    : (sensitivity >= 25 ? ADC_ATTEN_DB_6 
+                                    : ADC_ATTEN_DB_12));
+        adc_oneshot_chan_cfg_t adcCfg = {
+            .bitwidth = ADC_BITWIDTH_12,
+            .atten = esp_sensitivity,
+        };
+        ESP_ERROR_CHECK(adc_oneshot_config_channel(adc_handle, PRESSURE_GPIO, &adcCfg));
+    } else {
+        Config.sensor_sensitivity = sensitivity;
     };
-    ESP_ERROR_CHECK(adc_oneshot_config_channel(adc1_handle, PRESSURE_GPIO, &adcCfg));
-
-    //rather than use this as a software multiplier we'll set different ADC attenuation level
-    // ADC_ATTEN_DB_0   = 0,  ///<No input attenuation, ADC can measure up to approx.
-    // ADC_ATTEN_DB_2_5 = 1,  ///<The input voltage of ADC will be attenuated extending the range of measurement by about 2.5 dB
-    // ADC_ATTEN_DB_6   = 2,  ///<The input voltage of ADC will be attenuated extending the range of measurement by about 6 dB
-    // ADC_ATTEN_DB_12  = 3,  ///<The input voltage of ADC will be attenuated extending the range of measurement by about 12 dB
-
 
 }
 
@@ -262,6 +366,12 @@ void eom_hal_led_init(void)
         eom_hal_set_led_flash_interval(2000);
         return;
     } else if (LED_TYPE == LED_TYPE_WS2812) {
+        if (LED_POWER > -1) {
+            gpio_reset_pin(LED_POWER);
+            gpio_set_direction(LED_POWER, GPIO_MODE_OUTPUT);
+            gpio_set_level(LED_POWER, 1); //power on the LED strip
+            vTaskDelay(10 / portTICK_PERIOD_MS); //give it a moment to power up
+        }
         led_strip = configure_led_2812();
         eom_hal_set_rgb_color(&rgb_blue);  // Blue = Starting up
     }
@@ -274,7 +384,7 @@ led_strip_handle_t configure_led_2812(void)
     led_strip_config_t strip_config = {
         .strip_gpio_num = LED_GPIO,   // The GPIO that connected to the LED strip's data line
         .max_leds = LED_NUM,        // The number of LEDs in the strip,
-        .color_component_format = LED_STRIP_COLOR_COMPONENT_FMT_RGB, // Color format of your LED strip
+        .color_component_format = LED_STRIP_COLOR_COMPONENT_FMT, // Color format of your LED strip
         .led_model = LED_MODEL_WS2811,            // LED strip model
         .flags.invert_out = false,                // whether to invert the output signal
     };

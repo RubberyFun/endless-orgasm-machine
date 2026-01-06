@@ -8,6 +8,7 @@ extern "C" {
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include "led_strip.h"
 
 #define MOTOR1_ENABLED 1
 #define MOTOR2_ENABLED 1
@@ -33,9 +34,49 @@ static const char* CONFIG_FILENAME = "/spiffs/config.json";
 #define GATTS_INPUT1_CHAR_UUID     0x6003
 #define GATTS_INPUT2_CHAR_UUID     0x6004
 
+
+enum pressure_sensor_type {
+    PRESSURE_SENSOR_ANALOG,
+    PRESSURE_SENSOR_SPI,
+    PRESSURE_SENSOR_I2C
+};
+
+enum pressure_sensor_hardware {
+    PRESSURE_SENSOR_HARDWARE_ANALOG,
+    PRESSURE_SENSOR_HARDWARE_MPR,
+    PRESSURE_SENSOR_HARDWARE_HX711  //maybe later, MPR is preferred
+};
+
+typedef enum pressure_sensor_type pressure_sensor_type_t;
+typedef enum pressure_sensor_hardware pressure_sensor_hardware_t;
+
+#ifndef LED_POWER
+    #define LED_POWER -1
+#endif
+
+#ifdef LED_FORMAT
+    #if LED_FORMAT == 1
+        #define LED_STRIP_COLOR_COMPONENT_FMT LED_STRIP_COLOR_COMPONENT_FMT_RGB
+    #elif LED_FORMAT == 2
+        #define LED_STRIP_COLOR_COMPONENT_FMT LED_STRIP_COLOR_COMPONENT_FMT_GRB
+    #endif
+#else
+    #define LED_STRIP_COLOR_COMPONENT_FMT LED_STRIP_COLOR_COMPONENT_FMT_GRB // Default
+#endif
+
+#define PRESSURE_SENSOR PRESSURE_SENSOR_I2C
+#define PRESSURE_SENSOR_HARDWARE PRESSURE_SENSOR_HARDWARE_MPR
 //which pin to read analog pressure sensor from
 //This can accept any ADC_UNIT_1 channel...so ADC_CHANNEL_0 to ADC_CHANNEL_7
-#define PRESSURE_GPIO ADC_CHANNEL_0
+#define PRESSURE_GPIO ADC_CHANNEL_9
+#define ADC_UNIT ADC_UNIT_1
+#define PRESSURE_PICO 39
+#define PRESSURE_POCI 38
+#define PRESSURE_CS 7
+
+#define PRESSURE_SCK 40 //shared by SPI and I2C configs
+#define PRESSURE_SDA 41 //for I2C
+
 //ADC_CHANNEL_0 is gpio 5 on Xaio Seed ESP32-S3, labeled D5 (LED pin is D21) 
 //ADC_CHANNEL_0 is gpio 1 on Waveshare ESP32-S3, labeled 1  (LED pin is 21, ws2812)
 //ADC_CHANNEL_0 is gpio 36 on NodeMCU ESP32S, labeled SVP. (another channel might be more accurate)  (LED pin is 2)
@@ -46,8 +87,8 @@ static const char* CONFIG_FILENAME = "/spiffs/config.json";
 
 #define EOM_HAL_PRESSURE_MAX 0x0FFF // 12 bits ADC reading is standard for esp32
 
-#define DEFAULT_AMBIENT_RESSURE 0
-#define DEFAULT_PRESSURE_SENSITIVITY 3
+#define DEFAULT_AMBIENT_PRESSURE 0
+#define PRESSURE_MULTIPLIER 6   // Scales raw pressure reading for I2C sensors
 
 extern bool isConnected;
 
