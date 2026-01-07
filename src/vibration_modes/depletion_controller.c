@@ -2,6 +2,7 @@
 //#include "esp_log.h"
 #include "orgasm_control.h"
 #include "vibration_mode_controller.h"
+#include <math.h>
 
 static const char* TAG = "depletion_controller";
 
@@ -25,8 +26,8 @@ static float increment(void) {
         );
     }
 
-    float alter_perc = ((float)state.arousal / Config.sensitivity_threshold);
-    float final_speed = state.base_speed * (1 - alter_perc);
+    float alter_perc = fminf(1.0f,((float)state.arousal / Config.sensitivity_threshold));
+    float final_speed = orgasm_control_is_permit_orgasm_reached() ? state.base_speed * (1 - alter_perc/2) : state.base_speed * (1 - alter_perc);
 
     if (final_speed < (float)Config.initial_pleasure) {
         return Config.initial_pleasure;

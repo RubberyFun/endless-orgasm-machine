@@ -162,7 +162,7 @@ uint16_t eom_hal_get_pressure_reading(void) {
         uint16_t scaled = (uint16_t)(adjusted >> 12);
         scaled = (scaled * (Config.sensor_sensitivity / 100.0 * PRESSURE_MULTIPLIER));
         if (scaled > EOM_HAL_PRESSURE_MAX) scaled = EOM_HAL_PRESSURE_MAX;
-        ESP_LOGI(TAG, "12bit: %d Raw data: %" PRIi32, scaled, data);
+        ESP_LOGD(TAG, "12bit: %d Raw data: %" PRIi32, scaled, data);
         return scaled;
 
 
@@ -283,8 +283,9 @@ void eom_hal_led_tick(void) {
             last_flash = current_time;
              if (LED_TYPE == LED_TYPE_MONO) {
                 eom_hal_set_led_mono(flash_on);
-            } else if (LED_TYPE == LED_TYPE_WS2812) {
-                eom_hal_set_rgb(flash_on ? led_color.r : 0, flash_on ? led_color.g : 0, flash_on ? led_color.b : 0);
+            } else {
+                // eom_hal_set_rgb(flash_on ? led_color.r : 0, flash_on ? led_color.g : 0, flash_on ? led_color.b : 0);
+                eom_hal_set_rgb(led_color.r,led_color.g,led_color.b);
             }
         }
     }
@@ -292,21 +293,9 @@ void eom_hal_led_tick(void) {
 
 void eom_hal_set_rgb(uint8_t r, uint8_t g, uint8_t b) {
     
-    // Skip update only if color unchanged AND not flashing
-    if ((is_flashing && !flash_on && led_color.r == 0 && led_color.g == 0 && led_color.b == 0) 
-        || (led_color.r == r && led_color.g == g && led_color.b == b)
-    ) {
+    // Skip update only if color unchanged
+    if (!is_flashing &&  (led_color.r == r && led_color.g == g && led_color.b == b)) {
         return; //no change
-    }
-
-    if (!is_flashing || flash_on) {
-            led_color.r = r;
-            led_color.g = g;
-            led_color.b = b;
-    } else {
-        led_color.r = 0;
-        led_color.g = 0;
-        led_color.b = 0;
     }
 
     if (LED_TYPE == LED_TYPE_WS2812) {
@@ -315,7 +304,17 @@ void eom_hal_set_rgb(uint8_t r, uint8_t g, uint8_t b) {
             return;
         }
         esp_err_t err = ESP_OK;
-        err = led_strip_set_pixel(led_strip, 0, r, g, b);
+
+
+        if (!is_flashing || flash_on) {
+                led_color.r = r;
+                led_color.g = g;
+                led_color.b = b;
+                err = led_strip_set_pixel(led_strip, 0, r, g, b);
+        } else {
+            err = led_strip_set_pixel(led_strip, 0, 0, 0, 0);
+        }
+
 
         if (err != ESP_OK) {
             ESP_LOGE(TAG, "led_strip_set_pixel failed: %s", esp_err_to_name(err));
@@ -372,6 +371,7 @@ void eom_hal_led_init(void)
             gpio_set_level(LED_POWER, 1); //power on the LED strip
             vTaskDelay(10 / portTICK_PERIOD_MS); //give it a moment to power up
         }
+        eom_hal_set_led_flashing(0);
         led_strip = configure_led_2812();
         eom_hal_set_rgb_color(&rgb_blue);  // Blue = Starting up
     }

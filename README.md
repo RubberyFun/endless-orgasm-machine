@@ -138,10 +138,10 @@ This is a product of the open source community.  This will always be open source
 - **night-howler** who contributed a breadboard friendly version of the nogasm called [protogasm](https://github.com/night-howler/protogasm).
 
 ### To-do priority
-- connect to OSSM and DG Labs Coyote
+- connect to DG Labs Coyote
 - add build walkthrough to docs and more examples, pinouts and schematics
-- audio buzzer for cooldown!
-- add a config save button so setting changes aren't immediately permanent (save toy settings separately?)
+- audio buzzer in ui for cooldown!
+- add a config save button so setting changes aren't immediately permanent (save toy settings also/separately?)
 - do canvas drawing to offscreen element for efficiency
 - integrate smoothing filters into pressure readings
 - ui and websockets using same endpoint if possible

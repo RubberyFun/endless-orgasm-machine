@@ -13,7 +13,7 @@ void mpr_dev_config(i2c_device_config_t* config) {
 }
 
 esp_err_t mpr_read_pressure(i2c_master_dev_handle_t dev_handle, int32_t* pressure) {
-    esp_log_level_set(TAG, ESP_LOG_DEBUG);
+    //esp_log_level_set(TAG, ESP_LOG_DEBUG);
     uint8_t data[MPR_PRESSURE_RESPONSE_LEN];
     esp_err_t ret = ESP_FAIL;
     uint8_t status = 0;
@@ -41,7 +41,7 @@ esp_err_t mpr_read_pressure(i2c_master_dev_handle_t dev_handle, int32_t* pressur
 
         ESP_LOGD(TAG, "Request sent successfully, waiting for sensor to process...");
 
-        //vTaskDelay(MPR_READ_WAIT_MS / portTICK_PERIOD_MS);  // Wait for sensor to process and get response
+        vTaskDelay(MPR_READ_WAIT_MS / portTICK_PERIOD_MS);  // Wait for sensor to process and get response
         ret = i2c_master_receive(dev_handle, data, MPR_PRESSURE_RESPONSE_LEN, MPR_TIMEOUT_MS);
 
         // ret = i2c_master_transmit_receive(dev_handle, (const uint8_t*)MPR_PRESSURE_REQ, sizeof(MPR_PRESSURE_REQ), data, MPR_PRESSURE_RESPONSE_LEN, MPR_TIMEOUT_MS); // Transmit request and receive response in one transaction

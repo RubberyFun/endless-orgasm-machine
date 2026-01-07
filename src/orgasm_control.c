@@ -110,7 +110,7 @@ void orgasm_control_set_pleasure_ex(uint8_t pleasure, bool use_motor) {
         #endif
     }
 
-    output_state.pleasure = pleasure;
+    //output_state.pleasure = pleasure;
 }
 
 /**
@@ -156,7 +156,7 @@ static const vibration_mode_controller_t* get_vibration_mode_controller() {
  */
 static void orgasm_control_update_arousal() {
     // Decay stale arousal value:
-    update_check(arousal_state.arousal, arousal_state.arousal * 0.99);  //why are we measureing pleasure as a float but arousal as an int?
+    update_check(arousal_state.arousal, arousal_state.arousal * 0.99);  //why are we measureing pleasure as a float but arousal as an int?  Why decrease at 1%? (should be configurable)
 
     // Acquire new pressure and take average:
     arousal_state.pressure_value = eom_hal_get_pressure_reading();
@@ -191,7 +191,7 @@ static void orgasm_control_update_arousal() {
     if (Config.clench_detector_in_edging) {
         if (clench_duration > Config.clench_time_threshold_ms &&
                 clench_duration < Config.max_clench_duration_ms) {
-            arousal_state.arousal += 5;
+            arousal_state.arousal += 5;  //why 5?
             arousal_state.update_flag = ocTRUE;
         }
     }
@@ -237,21 +237,25 @@ static void orgasm_control_update_pleasure() {
                output_state.pleasure > 0 && on_time > (Config.minimum_on_time * 1000)) {
         // EDGE DETECTED
         // We're not already in timeout, but arousal is high enough to stop the pleasure
-        output_state.pleasure = controller->stop();
-        output_state.motor_stop_time = (esp_timer_get_time() / 1000UL);
-        output_state.motor_start_time = 0;
-        arousal_state.update_flag = ocTRUE;
-        arousal_state.cooldown = (Config.edge_delay * 1000) + output_state.random_additional_delay;  //calculate cooldown
-        orgasm_state.orgasm_count += 1;
-        ESP_LOGI(TAG, "Orgasm Denied! Total: %d", orgasm_state.orgasm_count);
-        
+        if (!orgasm_control_is_permit_orgasm_reached()) {
+            output_state.pleasure = controller->stop();
+            output_state.motor_stop_time = (esp_timer_get_time() / 1000UL);
+            output_state.motor_start_time = 0;
+            arousal_state.update_flag = ocTRUE;
+            arousal_state.cooldown = (Config.edge_delay * 1000) + output_state.random_additional_delay;  //calculate cooldown
+            orgasm_state.orgasm_count += 1;
+            ESP_LOGI(TAG, "Orgasm Denied! Total: %d", orgasm_state.orgasm_count);
+            if (Config.max_additional_delay  != 0) {
+                output_state.random_additional_delay = random() % (Config.max_additional_delay * 1000);
+            }
+        } else {
+            ESP_LOGI(TAG,"EDGE DETECTED BUT ORGASM PERMITTED");
+        }
+
         //event_manager_dispatch(EVT_ORGASM_DENIAL, NULL, 0);
         eom_hal_set_rgb_color(&rgb_red); // Red over threshold
         eom_hal_set_led_flashing(1);
         // If Max Additional Delay is not disabled, caculate a new delay for the next time pleasure is stopped
-        if (Config.max_additional_delay  != 0) {
-            output_state.random_additional_delay = random() % (Config.max_additional_delay * 1000);
-        }
 
     } else if (output_state.pleasure == 0 && output_state.motor_start_time == 0) {
         // the timeout is over and motor is stopped
@@ -274,12 +278,10 @@ static void orgasm_control_update_pleasure() {
     } else {
         // Normal pleasure mode...Increment or Change
         update_check(output_state.pleasure, controller->increment());
-        if (LED_TYPE == LED_TYPE_MONO ) {
-            uint16_t interval = 1000 - ((float)(arousal_state.arousal) / (Config.sensitivity_threshold)) * 1000;
-            eom_hal_set_led_flash_interval(interval);
-        } else {
+        eom_hal_set_led_flash_interval((uint16_t)fmaxf((float)MINIMUM_BLINK_L, 1000.0f - ((float)arousal_state.arousal / (float)Config.sensitivity_threshold) * 1000.0f));
+        if (LED_TYPE != LED_TYPE_MONO ) {
             if (arousal_state.arousal < Config.mid_threshold) {
-                RGBColor fadedColor;
+            RGBColor fadedColor;
                 if (isConnected) {
                     fadedColor = calculate_fade_color(rgb_green, rgb_orange, (float)arousal_state.arousal / Config.mid_threshold);
                 } else {
@@ -294,13 +296,14 @@ static void orgasm_control_update_pleasure() {
     }
 
     // Control pleasure if we are not manually doing so.
-    if (output_state.control_motor) {
-        uint8_t pleasure = orgasm_control_get_pleasure();
-        orgasm_control_set_pleasure(pleasure);
-    }
+    // if (output_state.control_motor) {
+    //     uint8_t pleasure = orgasm_control_get_pleasure();
+    //     orgasm_control_set_pleasure(pleasure);
+    // }
 }
 
 static void orgasm_control_update_edging_time() { // Edging+Orgasm timer
+    const vibration_mode_controller_t* controller = get_vibration_mode_controller();
     // Make sure menu_is_locked is turned off in Manual mode
     if (output_state.output_mode == OC_MANUAL) {
         post_orgasm_state.menu_is_locked = ocFALSE;
@@ -327,7 +330,7 @@ static void orgasm_control_update_edging_time() { // Edging+Orgasm timer
     // Pre-Orgasm loop -- Orgasm is permited
     if (orgasm_control_is_permit_orgasm_reached() && !orgasm_control_is_post_orgasm_reached()) {
         if (output_state.control_motor) {
-            orgasm_control_pause_control(); // make sure orgasm is now possible
+            //orgasm_control_pause_control(); // make sure orgasm is now possible
         }
 
         // now detect the orgasm to start post orgasm torture timer
@@ -345,8 +348,9 @@ static void orgasm_control_update_edging_time() { // Edging+Orgasm timer
         }
 
         // raise pleasure to max. protect not to go higher than max
-        if (output_state.pleasure <= (Config.max_pleasure - 5)) {
-            output_state.pleasure += 5;  //why 5?
+        if (output_state.pleasure < Config.max_pleasure) {
+            update_check(output_state.pleasure, controller->increment());
+            //output_state.pleasure += 5;  //why 5?
         } else {
             update_check(output_state.pleasure, Config.max_pleasure);
         }
@@ -368,6 +372,7 @@ static void orgasm_control_update_edging_time() { // Edging+Orgasm timer
                 post_orgasm_state.menu_is_locked = ocFALSE;
                 post_orgasm_state.detected_orgasm = ocFALSE;
                 output_state.pleasure = 0;
+                arousal_state.cooldown = 0;
                 orgasm_control_set_pleasure(output_state.pleasure);
                 orgasm_control_set_output_mode(OC_MANUAL);
             }
@@ -434,18 +439,16 @@ void orgasm_control_twitch_detect() {
     if (arousal_state.arousal > Config.sensitivity_threshold) {
         output_state.motor_stop_time = (esp_timer_get_time() / 1000UL);
         arousal_state.cooldown = (Config.edge_delay * 1000) + output_state.random_additional_delay;
-        if (LED_TYPE == LED_TYPE_MONO ) {
-            eom_hal_set_led_flash_interval(1);
-        }
+        eom_hal_set_led_flash_interval(MINIMUM_BLINK_L);
         eom_hal_set_led_flashing(1);
         eom_hal_set_rgb_color(&rgb_red); // Red over threshold
 
     } else {
         //fade out flash
-        if (LED_TYPE == LED_TYPE_MONO ) {
+        //if (LED_TYPE == LED_TYPE_MONO ) {
             uint16_t interval = 1000 - ((float)arousal_state.cooldown / (float)((Config.edge_delay * 1000) + output_state.random_additional_delay)) * 1000;
             eom_hal_set_led_flash_interval(interval);
-        }
+        //}
         RGBColor fadedColor = calculate_fade_color(rgb_off,rgb_red, ((float)arousal_state.cooldown / (float)((Config.edge_delay * 1000) + output_state.random_additional_delay)));
         eom_hal_set_rgb(fadedColor.r, fadedColor.g, fadedColor.b);
         //eom_hal_set_led_flashing(0);

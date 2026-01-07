@@ -19,7 +19,7 @@
   "mid_threshold": 512,
   "motor_ramp_time_s": 120,
   "update_frequency_hz": 30,
-  "sensor_sensitivity": 3,
+  "sensor_sensitivity": 50,
   "use_average_values": true,
   "force_bt_coex": true,
   "use_ssl": true,

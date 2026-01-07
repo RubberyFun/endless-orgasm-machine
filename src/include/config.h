@@ -54,6 +54,10 @@ typedef enum pressure_sensor_hardware pressure_sensor_hardware_t;
     #define LED_POWER -1
 #endif
 
+#ifndef SLEEP_GPIO
+    #define SLEEP_GPIO -1
+#endif
+
 #ifdef LED_FORMAT
     #if LED_FORMAT == 1
         #define LED_STRIP_COLOR_COMPONENT_FMT LED_STRIP_COLOR_COMPONENT_FMT_RGB
@@ -63,6 +67,8 @@ typedef enum pressure_sensor_hardware pressure_sensor_hardware_t;
 #else
     #define LED_STRIP_COLOR_COMPONENT_FMT LED_STRIP_COLOR_COMPONENT_FMT_GRB // Default
 #endif
+
+#define MINIMUM_BLINK_L 40
 
 #define PRESSURE_SENSOR PRESSURE_SENSOR_I2C
 #define PRESSURE_SENSOR_HARDWARE PRESSURE_SENSOR_HARDWARE_MPR
@@ -88,7 +94,7 @@ typedef enum pressure_sensor_hardware pressure_sensor_hardware_t;
 #define EOM_HAL_PRESSURE_MAX 0x0FFF // 12 bits ADC reading is standard for esp32
 
 #define DEFAULT_AMBIENT_PRESSURE 0
-#define PRESSURE_MULTIPLIER 6   // Scales raw pressure reading for I2C sensors
+#define PRESSURE_MULTIPLIER 10   // Scales raw pressure reading for I2C sensors
 
 extern bool isConnected;
 

@@ -45,7 +45,7 @@
     threshold: number;
   };
 
-    let readings = $state([
+  let readings = $state([
     {
       pressure: 4000,
       arousal: 4000,
@@ -386,6 +386,7 @@
   let thresholdStep = 100;
   let isWsConnected = $state(false) as boolean;
   let isBtConnected = $state(false) as boolean;
+  let syncDelta = $state(0) as number;
   let lastConnection = $state("bt") as string;
 
   let mainSend: any = null;
@@ -677,6 +678,7 @@
     isWsConnected = true;
     btDevice.disconnect();
     isBtConnected = false;
+    syncDelta = 0;
     console.log("WebSocket connection established");
     let msg = JSON.stringify({ configList: null });
     socket.send(msg);
@@ -697,6 +699,7 @@
         } else {
           //should I just let bluetooth handle its state by itself?
           isBtConnected = false;
+          syncDelta = 0;
           btDevice?.disconnect();
         }
       }
@@ -826,6 +829,7 @@
       }
       console.log(
         "Current readings:",
+        $state.snapshot(readings).length,
         $state.snapshot(readings)[$state.snapshot(readings).length - 1],
       );
     }, 30000); // Log every 30 seconds
@@ -850,6 +854,7 @@
     btDevice = null;
     console.log(`Device ${eomDevice.name} is disconnected.`);
     isBtConnected = false;
+    syncDelta = 0;
   }
 
   function sendConfigRequest() {
@@ -907,6 +912,7 @@
       console.log('Disconnecting from Bluetooth device:', btDevice);
       btDevice?.gatt.disconnect();
       isBtConnected = false;
+      syncDelta = 0;
     } else {
       bt.requestDevice({
         optionalServices: [0x6969, 0x696A, 0x696B],
@@ -928,6 +934,7 @@
                 //readings
                 service.getCharacteristic(0x696a).then((characteristic: any) => {
                   console.log('Got characteristic:', characteristic);
+                  syncDelta = 0;
 
                   characteristic.addEventListener('characteristicvaluechanged', (event: any) => {
                     const value = event.target.value;
@@ -945,10 +952,11 @@
                       pleasureMode: data[7],
                       permit: data[8] * 255 + (data[9] ?? 0),
                       color: String(data[10]) + String(data[11]) + String(data[12]),
-                      millis: Date.now(),
+                      millis: (((data[13] << 24) | (data[14] << 16) | (data[15] << 8) | data[16]) >>> 0),
                       localTime: Date.now(),
                     };
                     readings.push(newReading);
+                    if (!syncDelta) syncDelta = (newReading.localTime ?? Date.now()) - newReading.millis;
 
 
                     //it is long past time to refactor all of this
@@ -992,7 +1000,8 @@
                     });
 
                   while (
-                      readings.length > 0 && (Date.now() - (readings[0].localTime ?? 0) > settings.chart_window_s.value * 1000)  
+                      // readings.length > 0 && (Date.now() - (readings[0].localTime ?? 0) > settings.chart_window_s.value * 1000)  
+                      readings.length > 0 && (Date.now() - syncDelta - (readings[0].millis ?? 0) > settings.chart_window_s.value * 1000)  
                     ) {
                       //the first reading is older than chartTime seconds
                       readings.shift();
