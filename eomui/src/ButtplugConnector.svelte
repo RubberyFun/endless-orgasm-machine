@@ -46,6 +46,8 @@
 
     client.addListener("deviceremoved", (device: ButtplugClientDevice) => {
       console.log(`Device removed: ${device.name}`,device);
+      device.emitDisconnected(); 
+      //client.disconnect();
       deviceList = deviceList.filter(d => d !== device);
     });
     // @ts-ignore
@@ -140,10 +142,10 @@
     {#if deviceList.length === 0}
       <p style="margin-left: 10px;color: orange;">No devices connected</p>
     {/if}
-    <div style="display: flex;align-items: center;">Powered by: <a href="https://buttplug.io " target="_blank"><img src="buttplug_logo.png" alt="Buttplug Logo" style="margin-left:10px; max-height: 40px;" /></a></div>
+    <div style="display: flex;align-items: center;">Powered by: <a href="https://buttplug.io/" target="_blank"><img src="buttplug_logo.png" alt="Buttplug Logo" style="margin-left:10px; max-height: 40px;" /></a></div>
   </div>
   {#if deviceList.length === 0}
-    <p style="font-size: small;">Currently supported toys are listed <a href="https://iostindex.com/?filter0Availability=Available,DIY&filter1Connection=Bluetooth%204%20LE&filter2ButtplugSupport=4&filter3Features=OutputsVibrators" target="_blank">by this website</a></p>
+    <p style="font-size: small;">Currently supported toys are listed <a href="https://iostindex.com/?filter0Availability=Available,DIY&filter1Connection=Bluetooth%204%20LE&filter2ButtplugSupport=4&filter3Features=OutputsVibrators" target="_blank">by IoST Index</a></p>
   {:else}
     <ul>
       {#each deviceList as device}
@@ -156,6 +158,8 @@
               aria-label="Close settings"
               onclick={async () => {
                 await device.stop();
+                device.emitDisconnected();
+                device.removeAllListeners();
                 deviceList = deviceList.filter(d => d !== device);
                 }}
             >

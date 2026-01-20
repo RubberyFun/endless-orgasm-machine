@@ -147,13 +147,14 @@ This is a product of the open source community.  This will always be open source
 - ui and websockets using same endpoint if possible
 - bug: arousal overflows on hardware side
 - logging from the app
+- battery monitoring
 - add X axis on chart (seconds)
 - chart glitch on left side at startup
 - make motor pin selection more intuitive
 - Put some effort into UI styling
 - display toy battery level
 - bluetooth OTA
-- device disconnection
+- device disconnection  
 - disable internal motor control option?
 - integrated screen support / ip display
 - Implement patterns?  That's a biggie

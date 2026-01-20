@@ -3,9 +3,12 @@
   import type { Action } from "svelte/action";
     import { run } from "svelte/legacy";
   import BTLED from "./BTLED.svelte";
+  import OSSM from "./OSSM.svelte";
   import DeviceList from "./ButtplugConnector.svelte";
 
   let btledComponent: any;
+  let ossmComponent: any;
+  let ossmDevices = $state([]); // List of OSSM devices
   let BTLEDconnected = $state(false);
   let deviceComponent: any;
   let deviceList = $state([]); // List of Buttplug devices
@@ -480,9 +483,27 @@
     return (_reading.cooldown ?? 0) > 0 && _reading.motor == 0;
   }
 
+  let chartUpdateScheduled = false;
+
+  function scheduleChartUpdate() {
+    if (!chartUpdateScheduled) {
+      chartUpdateScheduled = true;
+      requestAnimationFrame(() => {
+        updateChart();
+        chartUpdateScheduled = false;
+      });
+    }
+  }
+
+  function getDownsampledReadings(_readings: eomReading[], maxPoints = 100) {
+    if (_readings.length <= maxPoints) return _readings;
+    const step = Math.ceil(_readings.length / maxPoints);
+    return _readings.filter((_, i) => i % step === 0);
+  }
+
   function updateChart() {
     if (!ctx || !chartCanvas || displayMode != 1) return;
-    const _readings = $state.snapshot(readings);
+    const _readings = getDownsampledReadings($state.snapshot(readings));
     if (_readings.length === 0) return;
     const xScale = scaleLinear(
       [0, _readings.length - 1],
@@ -606,7 +627,7 @@
 
 
   function handleUpdated(e: CustomEvent<number[]>) {
-    updateChart();
+    scheduleChartUpdate();
   }
 
   function handleConfigList(configList: Object) {
@@ -668,7 +689,7 @@
         readings.shift();
       }
 
-      chartCanvas?.dispatchEvent(new CustomEvent("updated", {}));
+      scheduleChartUpdate();
     } catch (error) {
       console.error("Error parsing WebSocket message:", error);
     }
@@ -683,7 +704,7 @@
     let msg = JSON.stringify({ configList: null });
     socket.send(msg);
     socket.send(JSON.stringify({ streamReadings: null }));
-    chartCanvas?.dispatchEvent(new CustomEvent("ready", {}));
+    scheduleChartUpdate();
 
     setInterval(() => {
       let lastReadingTime = $state.snapshot(readings)[$state.snapshot(readings).length - 1].localTime ?? 0;
@@ -766,7 +787,34 @@
       });
           
     } else {
-      console.warn("Not connected via WebSocket or Bluetooth. Cannot send setting change.");
+      if (setting_name == "setMotor") {
+        readings.push({
+          pressure: lastNumericValue("pressure"),
+          arousal: lastNumericValue("arousal"),
+          motor: Number(value),
+          pleasure: Number(value),
+          threshold: lastNumericValue("threshold"),
+          denied: lastNumericValue("denied"),
+          runMode: runModes[lastNumericValue("runMode")],
+          localTime: Date.now(),
+          millis: Date.now(),
+        } as eomReading);
+      } else if (setting_name == "setMode") {
+        readings.push({
+          pressure: lastNumericValue("pressure"),
+          arousal: lastNumericValue("arousal"),
+          motor: lastNumericValue("pleasure"),
+          pleasure: lastNumericValue("pleasure"),
+          threshold: lastNumericValue("threshold"),
+          denied: lastNumericValue("denied"),
+          runMode: value as string,
+          localTime: Date.now(),
+          millis: Date.now(),
+        } as eomReading);
+      }
+      //console.warn("Not connected via WebSocket or Bluetooth. Cannot send setting change.");
+      updateDevices(readings[readings.length - 1]);
+      scheduleChartUpdate();
       return;
     }
     console.log(`Sent ${setting_name} change:`, value);
@@ -825,14 +873,14 @@
       console.log($state.snapshot(isWsConnected),isWsConnected,$state.snapshot(isBtConnected),isBtConnected);
       if (!(isWsConnected || isBtConnected)) {
         console.log("Not connected");
-        return;
+        //return;
       }
       console.log(
         "Current readings:",
         $state.snapshot(readings).length,
         $state.snapshot(readings)[$state.snapshot(readings).length - 1],
       );
-    }, 30000); // Log every 30 seconds
+    }, 3000); // Log every 30 seconds
   });
 
   function handleConnect() {
@@ -903,6 +951,76 @@
     chartReady();
   };
 
+  function updateDevices(newReading: eomReading) {
+    deviceList.forEach((device: any) => {
+      updateButtplugDevice(device, newReading);
+    });
+
+    ossmDevices.forEach((device: any) => {
+      updateOssmDevice(device, newReading);
+    });
+
+    //lights here eventually?
+  }
+
+  function updateButtplugDevice( device: any, newReading: eomReading) {
+    device.controls.forEach((control: any) => {
+      if (control.mode != "manual") {
+        let value = 0;
+        switch (control.mode) {
+          case "arousal":
+            value = newReading.arousal / 16;
+            break;
+          case "pressure":
+            value = newReading.pressure / 16;
+            break;
+          case "denied":
+            value = (newReading.denied ?? 0) / settings.max_denied.value * 255;
+            break;
+          default:
+            value = newReading.pleasure ?? 0;
+            break;
+        }
+        if (control.sliderElement && value >= 0) {
+          if (control.invert) {
+            value = ((control.limitMax ?? control.max) ?? 255) - value;
+          }
+          console.log('Updating control:', control, value,Math.round(value),control.sliderElement.value);
+          if (control.sliderElement.value != String(Math.round(value))) {
+              control.sliderElement.value = Math.round(value);
+              deviceComponent?.handleDeviceChange(device, control, value / 255.0);
+          }
+        }
+      }
+    });
+  }
+  function updateOssmDevice( device: any, newReading: eomReading) {
+    Object.entries(device.controls).forEach((control: any) => {
+      if (control[1].mode != "manual") {
+        let value = 0.0;
+        switch (control[1].mode) {
+          case "arousal":
+            value = newReading.arousal / 256;
+            break;
+          case "pressure":
+            value = newReading.pressure / 256;
+            break;
+          case "denied":
+            value = (newReading.denied ?? 0) / settings.max_denied.value;
+            break;
+          default:
+            value = (newReading.pleasure ?? 0) / 256;
+            break;
+        }
+        if (control.invert) {
+          value = 1 - value;
+        }
+        console.log('Updating control:', newReading, control, value);
+        device.setControl(control[0], Math.round(value * ((control[1].limitMax ?? control[1].max) - (control[1].limitMin ?? control[1].min)) + (control[1].limitMin ?? control[1].min)) );
+        }
+    });
+  }
+
   function btConnect() {
     if (!bt) {
       alert('Web bluetooth is not available on iOS devices or Firefox.');
@@ -967,47 +1085,16 @@
                       btledComponent.writeRGB(r, g, b).catch((err: any) => console.error('Failed to write RGB:', err));
                     }
 
-                    deviceList.forEach((device: any) => {
-                      device.controls.forEach((control: any) => {
-                        if (control.mode != "manual") {
-                          let value = 0;
-                          switch (control.mode) {
-                            case "arousal":
-                              value = newReading.arousal / 16;
-                              break;
-                            case "pressure":
-                              value = newReading.pressure / 16;
-                              break;
-                            case "denied":
-                              value = (newReading.denied ?? 0) / settings.max_denied.value * 255;
-                              break;
-                            default:
-                              value = newReading.pleasure ?? 0;
-                              break;
-                          }
-                          if (control.sliderElement && value >= 0) {
-                            if (control.invert) {
-                              value = 255 - value;
-                            }
-                            //console.log('Updating control:', control, value,Math.round(value),control.sliderElement.value);
-                            if (control.sliderElement.value != String(Math.round(value))) {
-                              control.sliderElement.value = Math.round(value);
-                              deviceComponent?.handleDeviceChange(device, control, value / 255.0);
-                            }
-                          }
-                        }
-                      });
-                    });
+                    updateDevices(newReading);
 
-                  while (
-                      // readings.length > 0 && (Date.now() - (readings[0].localTime ?? 0) > settings.chart_window_s.value * 1000)  
-                      readings.length > 0 && (Date.now() - syncDelta - (readings[0].millis ?? 0) > settings.chart_window_s.value * 1000)  
-                    ) {
-                      //the first reading is older than chartTime seconds
-                      readings.shift();
+                    const cutoffTime = Date.now() - syncDelta - settings.chart_window_s.value * 1000;
+                    const firstValidIndex = readings.findIndex(r => (r.millis ?? 0) >= cutoffTime);
+                    if (firstValidIndex > 0) {
+                      readings = readings.slice(firstValidIndex);
                     }
+                    
                     currentPleasure = Number(newReading.pleasure);
-                    chartCanvas?.dispatchEvent(new CustomEvent("updated", {}));
+                    scheduleChartUpdate();
 
                   });
 
@@ -1706,6 +1793,7 @@
     <h2>Connect to bluetooth toys <span style="font-size: small;">(WIP)</span></h2>
     <hr />
     <DeviceList bind:this={deviceComponent} bind:deviceList />
+    <OSSM bind:this={ossmComponent} bind:devices={ossmDevices} />
     <BTLED bind:this={btledComponent} bind:BTLEDconnected />
   </div>
 </dialog>
