@@ -208,7 +208,7 @@
                   <button class="device-pause" title="Pause" onclick={() => {
                         ossm.setControl("speed", 0);
                   }}>
-                  <div style="font-size: xx-large; margin: 0; padding: 0; line-height: .6;">⏸</div>
+                   <div style="line-height: 1.25;">❚❚</div>
                   <div style="font-size: xx-small;">Pause</div>
                   </button>
                 {:else}
@@ -226,8 +226,8 @@
                 <button class="device-disconnect" title="Disconnect" onclick={() => {
                     ossm.device?.gatt?.disconnect();
                 }}>
-                X
-                <div style="font-size: xx-small;">Disconnect</div>
+                  ✕
+                <div style="font-size: xx-small; font-weight: normal;">Disconnect</div>
                 </button>
               </div>
             </div>
@@ -236,8 +236,9 @@
         <div class="device-sliders">
           <div style="display: flex;flex-direction: row;justify-content: space-between;">
 
-              <div style="font-weight: bold; margin-bottom: 1px;">
-              {control[0].charAt(0).toUpperCase() + control[0].slice(1)}: {control[1].value}  &nbsp;&nbsp; <span style="font-size: small;">(Min: {control[1].limitMin}, Max: {control[1].limitMax})</span>
+              <div style="font-weight: bold; margin-bottom: 1px; white-space: nowrap;">
+                {control[0].charAt(0).toUpperCase() + control[0].slice(1)}: {control[1].value} 
+                <span class="minMaxText">(Min: {control[1].limitMin}, Max: {control[1].limitMax})</span>
               </div>
 
               <div>
@@ -253,10 +254,11 @@
                   <option value="denied" selected={control[1].mode === "denied"}>Connect to Denials</option>
               </select>
               </div>
-              <div>
+              <div class="invertedText">
+                Invert:
                   <input type="checkbox" id={deviceIndex + "-" + control[0] + "-invert"} checked={control[1].inverted} onchange={async (e) => {
                       control[1].inverted = (e.target as HTMLInputElement).checked;
-                  }}/> Invert
+                  }}/>
               </div>
           </div>
 
@@ -321,7 +323,7 @@
     {/each}
     {:else}
     <div  style="font-size: small;">
-      <p>This supports <a target="_blank" href="https://www.researchanddesire.com/pages/ossm">OSSM devices</a> with a stock firmware from 2026 or newer.</p><p>If your OSSM firmware is older you can easily upgrade it using the web flashing tool at <a href="https://dashboard.researchanddesire.com/app/tools/web-flasher">https://dashboard.researchanddesire.com/app/tools/web-flasher</a></p>
+      <p>This supports <a target="_blank" href="https://www.researchanddesire.com/pages/ossm">OSSM devices</a> with a stock firmware from 2026 or newer.</p><p>If your OSSM firmware is older you can easily upgrade it using <a href="https://dashboard.researchanddesire.com/app/tools/web-flasher">their web flashing tool</a>.</p>
     </div>
  {/if}
    <div>
@@ -339,18 +341,45 @@
     padding: 1rem;
     border-top: 1px solid #ccc;
 
-    .device-disconnect {
+    /* specific styles for mobile and smaller screens */
+    @media screen and (max-width: 600px) {
+      .minMaxText {
+        display: none;
+      }
+      .invertedText {
+        white-space: nowrap;
+        font-size: xx-small;
+      }
+    }
+
+    /* larger screens */
+    .minMaxText {
+      font-size: small;
+      color: #ccc;
+    }
+    .invertedText {
+      white-space: nowrap;
+      font-size: small;
+    }
+
+    /* end larger screens */
+    .device-disconnect {  
       color: #900;
+      font-weight: bold;
       float: right; 
+      width: 4.8rem;
+      text-align: center;
     }
 
     .device-pause {
-      color: #090;
+      color: rgb(153, 0, 0);
+      background-color: rgb(248, 188, 188);
       width: 4rem;
     }
 
     .device-resume {
-      color: rgb(153, 145, 0);
+      color: rgb(7, 186, 72);
+      background-color: rgb(228, 248, 188);
       width: 4rem;
     }
 

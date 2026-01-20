@@ -880,7 +880,7 @@
         $state.snapshot(readings).length,
         $state.snapshot(readings)[$state.snapshot(readings).length - 1],
       );
-    }, 3000); // Log every 30 seconds
+    }, 30000); // Log every 30 seconds
   });
 
   function handleConnect() {
