@@ -312,7 +312,7 @@ void eom_hal_set_rgb(uint8_t r, uint8_t g, uint8_t b) {
                 led_color.b = b;
                 err = led_strip_set_pixel(led_strip, 0, r, g, b);
         } else {
-            err = led_strip_set_pixel(led_strip, 0, 0, 0, 0);
+            err = led_strip_set_pixel(led_strip, 0, 1, 0, 0);  //dim red rather than totally off for flash
         }
 
 

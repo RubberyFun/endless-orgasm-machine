@@ -13,6 +13,9 @@
 #include <esp_https_ota.h>
 #include <esp_ota_ops.h>
 #include <esp_system.h>
+#include <esp_sleep.h>
+#include <driver/gpio.h>
+#include "driver/rtc_io.h"
 #include <time.h>
 #include <nvs_flash.h>
 #include <esp_spiffs.h>
@@ -98,11 +101,99 @@ static void main_task(void* args) {
     orgasm_control_set_output_mode(OC_AUTOMATIC);
 
     for (;;) {
-        loop_task(NULL);
+        //loop_task(NULL);
         orgasm_control_tick();
         eom_hal_led_tick();
+
         //send_output1();
         vTaskDelay(1);
+    }
+}
+
+static void sleep_monitor_task(void* args) {
+    if (SLEEP_GPIO < 0) {
+        ESP_LOGI(TAG, "SLEEP_GPIO not configured, sleep monitor disabled");
+        vTaskDelete(NULL);
+        return;
+    }
+
+    // Configure GPIO as input with pull-down
+    gpio_config_t io_conf = {
+        .pin_bit_mask = (1ULL << SLEEP_GPIO),
+        .mode = GPIO_MODE_INPUT,
+        .pull_up_en = GPIO_PULLUP_ENABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE
+    };
+    esp_err_t ret = gpio_config(&io_conf);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to configure SLEEP_GPIO %d: %s", SLEEP_GPIO, esp_err_to_name(ret));
+        vTaskDelete(NULL);
+        return;
+    }
+
+    ESP_LOGI(TAG, "Sleep monitor initialized on GPIO %d", SLEEP_GPIO);
+
+    TickType_t sleep_debounce_until = 0;
+
+    for (;;) {
+        int level = gpio_get_level(SLEEP_GPIO);
+        ESP_LOGD(TAG, "Sleep signal on GPIO %d", level);
+        
+        // Ignore LOW levels during debounce period
+        if (level == 0 && xTaskGetTickCount() < sleep_debounce_until) {
+            ESP_LOGD(TAG, "Ignoring LOW level during debounce period");
+            vTaskDelay(pdMS_TO_TICKS(100));
+            continue;
+        }
+        
+        if (level == 0) {
+            ESP_LOGI(TAG, "Entering sleep...");
+            
+            
+            // Configure wake-up source
+            
+            if (LED_POWER > -1) {
+                gpio_set_level(LED_POWER, 0); //power off the LED
+            }
+            
+            // Disable pullup for sleep
+            // io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
+            // esp_err_t ret = gpio_config(&io_conf);
+            if (ret != ESP_OK) {
+                ESP_LOGE(TAG, "Failed to re-configure SLEEP_GPIO %d: %s", SLEEP_GPIO, esp_err_to_name(ret));
+            }
+            
+            // Give time for log message to be sent and button to be released
+            
+            // Enter sleep
+            // rtc_gpio_pullup_dis(SLEEP_GPIO);
+            // rtc_gpio_pulldown_en(SLEEP_GPIO);
+            // esp_sleep_enable_ext0_wakeup(SLEEP_GPIO, 1);
+            vTaskDelay(pdMS_TO_TICKS(500));
+            esp_sleep_enable_gpio_wakeup();
+            gpio_wakeup_enable(SLEEP_GPIO, GPIO_INTR_LOW_LEVEL);
+            esp_light_sleep_start();
+            ESP_LOGI(TAG, "esp_sleep.wake_reason=%d", esp_sleep_get_wakeup_cause());
+            
+            // Set debounce period: ignore LOW levels for 1 second after waking
+            sleep_debounce_until = xTaskGetTickCount() + pdMS_TO_TICKS(1000);
+            
+            // rtc_gpio_deinit(SLEEP_GPIO) ;
+            // Re-enable pullup for sleep
+            // io_conf.pull_up_en = GPIO_PULLUP_ENABLE;
+            ret = gpio_config(&io_conf);
+            if (ret != ESP_OK) {
+                ESP_LOGE(TAG, "Failed to re-configure SLEEP_GPIO %d: %s", SLEEP_GPIO, esp_err_to_name(ret));
+            }
+
+            if (LED_POWER > -1) {
+                gpio_set_level(LED_POWER, 1); //power on the LED
+            }
+        }
+        
+        // Check every 100ms - this MUST be here to prevent watchdog
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 
@@ -210,4 +301,5 @@ void app_main() {
     ESP_LOGI(TAG, "IP Address: %s", wifi_manager_get_local_ip());
     xTaskCreate(main_task, "MAIN", 1024 * 12, NULL, tskIDLE_PRIORITY + 1, NULL);
     xTaskCreate(ble_task, "BT", 1024 * 12, NULL, tskIDLE_PRIORITY + 2, NULL);
+    xTaskCreate(sleep_monitor_task, "SLEEP", 1024 * 4, NULL, tskIDLE_PRIORITY, NULL);
 }   
