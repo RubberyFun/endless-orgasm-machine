@@ -5,14 +5,14 @@ show_body = true;
 show_lid = true;
 lid_offset = true;  //for 3d printing
 show_cap = true;
-preview_electronics = true;  //false for printing
+preview_electronics = false; //false for printing
 show_mold = false;
 
 seed_w = 18;
-seed_h = 1.5;
+seed_h = 2;
 seed_l = 21;
 usb_d = 9;
-usb_w = 8;
+usb_w = 9;
 usb_h = 3.5;
 button_w = 4.5;
 button_d = 3.5;
@@ -119,6 +119,7 @@ module body() {
 
     //insert for esp32
     translate([0,-box_iw/2 + seed_l/2 - wall_thickness, -box_ih/2  -.2501]) qt_py_esp32s3(); //.25 because im getting overhang artifacts when it's flush
+    translate([0, box_iw/2 - seed_l/2 + wall_thickness, -box_ih / 2 +3]) qt_py_bff();
 
     if (!show_mold) {
 
@@ -200,12 +201,12 @@ module cap() {
 
 module lid() {
   //components back cover
-  translate([0, 0,-box_ih / 2]) { // + .75  //box_id / 2 + wall_thickness + 5
+  translate([0, 0,-box_ih / 2 - 1]) { // magic -1
     //?
     color("purple") 
       //scale([1, 1, .5])
         difference() {
-           # cuboid ([box_id + wall_thickness * 2, box_iw + wall_thickness * 3.75, box_lid_h * 2], rounding=box_fillet,edges="Z"); //lid box);
+            #cuboid ([box_id + wall_thickness * 2, box_iw + wall_thickness * 3.75, box_lid_h * 2], rounding=box_fillet,edges="Z"); //lid box);
 
           //cut off top
           translate([0,0, box_lid_h/2]) 
@@ -216,9 +217,16 @@ module lid() {
 
           //esp32 cutout
           translate([0,-box_iw/2 + seed_l/2 - wall_thickness, -.5]) qt_py_esp32s3(); 
+          translate([0, box_iw/2 - seed_l/2 + wall_thickness, 2.25]) qt_py_bff();  //.25 of cheat
 
           //button press mechanism 
          // #translate([-button_w/2, -box_iw/2 + wall_thickness + button_d/2, -5])
+        }
+
+        //bff stays
+        translate([0, box_iw/2 - seed_l/2 + wall_thickness, 1.5]) {
+          for (side = [-1, 1]) 
+            color("green") translate([side*6,2.5,-2]) cube([2,4,2], center=true);
         }
 
         //side clips
@@ -239,11 +247,47 @@ module lid() {
         }
 
         if (preview_electronics) {
-                    translate([0,-box_iw/2 + seed_l/2 - wall_thickness, -.5]) qt_py_esp32s3_w_battery_bud(); 
+                    translate([0,-box_iw/2 + seed_l/2 - wall_thickness, -.5]) qt_py_esp32s3(); 
+                    translate([0,box_iw/2 - seed_l/2 + wall_thickness, 2.5]) qt_py_bff(); 
         }
   }
-  translate([box_id, 0, -box_ih/2 - box_lid_h]) { // + .75  //box_id / 2 + wall_thickness + 5
+  translate([box_id, 0, -box_ih/2 - box_lid_h - 1]) { // + .75  //box_id / 2 + wall_thickness + 5
     translate([0,button_w * 3,0]) {
+      translate([0,button_w * 2]) rotate([90,0,0]) {
+        //slider arm
+          difference() {
+            union() {
+
+              translate([-1,2.5, -6.5])
+                color("brown") rotate([0,90,0]) cylinder(h=button_w, d=1.6, center=true); //cube([button_w, 5, 1], center=true); 
+
+              intersection() {
+                translate([-1,2.5, -6.5])
+                  difference() {
+                    rotate([0,90,0]) cylinder(h=button_w, d=9, center=true); //cube([button_w, 5, 1], center=true); 
+                    rotate([0,90,0]) cylinder(h=button_w, d=7, center=true); //cube([button_w, 5, 1], center=true); 
+                  }
+                translate([-1,2.5, -3])
+                  color("brown") cube([button_w, 5, 2], center=true); 
+              }
+
+              //channel for slider arm
+              translate([-1, 2.5,1 -seed_h - switch_h - box_lid_h/2 -.25])
+                color("green") cube([.8, 5, box_lid_h+3], center=true); //channel w needed = 8
+
+
+              // translate([0, seed_l/2 - button_d, .8 ])
+              //   color("brown") cube([button_w-.5, 5, 1.6], center=true); 
+
+              // translate([0, seed_l/2 - button_d,box_lid_h/2 + 1])
+              //   color("orange") cube([.8, 5, box_lid_h + 2], center=true); 
+            }
+          translate([-1, 2.5,-3])
+            color("purple") cube([ 1,3,2.4], center=true);  // cube([ 1,1.6,2.4], center=true); 
+
+          }
+
+      }
        scale ([1.2,1,1]) button(height=2);
     }
      scale ([1.2,1,1]) button();
@@ -290,10 +334,10 @@ module qt_py_esp32s3() {
     color("pink") cube([usb_d, usb_w, usb_h], center=true); //usb port
 
   translate([0,  -usb_d * 2 + wall_thickness * 2,  - usb_h/2 - seed_h/2])
-    color("transparent") cube([usb_w + 2, usb_d, usb_h + 1], center=true); //usb port clearance
+    color("transparent") cube([usb_w + 1, usb_d, usb_h + 1], center=true); //usb port clearance
 
   translate([2.5,  usb_d + .5,  -seed_h/2 - usb_h/2])
-    color("yellow") cube([usb_d, usb_w+1, usb_h], center=true); //i2c port, same clearance as usb
+    color("yellow") cube([usb_d, usb_w, usb_h], center=true); //i2c port, same clearance as usb
 
   //button 1 (sleep)
   translate([-button_w/2 - .75, -.5, -seed_h ]) scale ([1.2,1,1]) {
@@ -332,22 +376,31 @@ module qt_py_esp32s3() {
   }
 }  
 
-module qt_py_esp32s3_w_battery_bud() {
-  translate([0, 0, seed_h * 2]) {
-  rotate([0,180,0]) qt_py_esp32s3();
-
-  }
+module qt_py_bff() {
   //battery buddy pcb
-  color("red") rotate([0,0,0]) cuboid([seed_w, seed_l, seed_h], rounding=1, edges="Z"); //qt py esp32-s3
+  color("red")  cuboid([seed_w, seed_l-2, seed_h], rounding=1, edges="Z"); //qt py esp32-s3
+  //color("transparent") translate([0,0,-2.5]) cuboid([seed_w, seed_l-2, 3], rounding=1, edges="Z"); //qt py esp32-s3
 
   //jst for battery
-  translate([0,  -usb_d ,  -seed_h/2 - usb_h/2])
-    color("yellow") cube([usb_d, usb_w+1, usb_h], center=true); //i2c port, same clearance as usb
+  translate([0,  -usb_d ,  -seed_h/2 - usb_h/2 - 2])
+    color("yellow") cube([usb_d, usb_w, usb_h+2], center=true); //i2c port, same clearance as usb
 
   //slider on/off switch
-  translate([0, seed_l/2 - button_d, -seed_h ])
-    color("orange") cube([button_w, button_d*2, switch_h], center=true); //switch
+  translate([-1, seed_l/2 - button_d - 3.5, -seed_h ])
+    color("orange") cube([button_w, button_d*2, switch_h], center=true); 
 
+  //channel for slider arm
+  translate([-1,1.5, -6])
+    color("transparent") cube([button_w, 13, 2], center=true); 
+
+  translate([-1, 1.5,1.25 -seed_h - switch_h - box_lid_h/2 +.5])
+    color("transparent") cube([1.6, 13.5, box_lid_h], center=true); //channel w needed = 8
+
+  //channel start insert for arm
+  translate([-1,-3, -4])
+    color("transparent") cube([button_w, 4, 2], center=true); 
+
+   color("green")  translate([-1, 2.5,1.25 -seed_h - switch_h - box_lid_h/2 + 1.5]) rotate([0,90,0]) cylinder(h=button_w, d=1.6, center=true);
 }
 
 
@@ -356,7 +409,8 @@ if (preview_electronics) {
   translate([4, -24, 0])
     color("green") cube([ps_d, ps_w, ps_h], center=true); //pressure sensor
 
-  translate([0, -box_iw/2 + seed_l/2 - wall_thickness, -box_ih / 2 -.25]) qt_py_esp32s3_w_battery_bud();
+  translate([0, -box_iw/2 + seed_l/2 - wall_thickness, -box_ih / 2 -.25]) qt_py_esp32s3();
+  translate([0, box_iw/2 - seed_l/2 + wall_thickness, -box_ih / 2 +3]) qt_py_bff();
 
   translate([-2.5, 5, wall_thickness/2 ])
     color("blue")cube([battery_d, battery_w, battery_h], center=true); //battery

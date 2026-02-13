@@ -1792,8 +1792,30 @@
     </button>
     <h2>Connect to bluetooth toys <span style="font-size: small;">(WIP)</span></h2>
     <hr />
+          {#if $state.snapshot(readings)[$state.snapshot(readings).length - 1].runMode === 'MANUAL'}
+      <label for="pleasure" style="color:orange">Pleasure: {Math.floor(
+                (lastNumericValue("pleasure") / maxY) *
+                  100,
+              )} %</label>
+      <input
+        id="currentPleasure"
+        type="range"
+        min="0"
+        max={settings.max_pleasure.value}
+        step="1"
+        bind:value={currentPleasure}
+        style="width: 100%;accent-color: orange; background: linear-gradient(to right, orange 0%, orange 100%);"
+        oninput={() => {
+            //console.log("Dragging pleasure to ", currentPleasure);
+            debouncedBasicChange("setMotor",currentPleasure )
+            //handleBasicChange("setMotor",currentPleasure )
+          }
+        }
+      />
+      {/if}
+
     <DeviceList bind:this={deviceComponent} bind:deviceList />
-    <OSSM bind:this={ossmComponent} bind:devices={ossmDevices} />
+    <OSSM bind:this={ossmComponent} bind:devices={ossmDevices} EOMembedded={true} />
     <BTLED bind:this={btledComponent} bind:BTLEDconnected />
   </div>
 </dialog>
