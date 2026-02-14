@@ -681,13 +681,7 @@
       wsMsg.localTime = Date.now();
       readings.push(wsMsg);
       //currentPleasure = getNumericValue(wsMsg, "pleasure");
-      while (
-        readings.length > 0 &&
-          ((wsMsg.millis - (readings[0].millis ?? 0) > settings.chart_window_s.value * 1000) ||  //the first and last reading are more than chartWindow seconds apart
-          (Date.now() - (readings[0].localTime ?? 0) > settings.chart_window_s.value * 1000))  //the first reading is older than chartWindow seconds
-      ) {
-        readings.shift();
-      }
+      console.log("chart length:",settings.chart_window_s.value, wsMsg.millis - (readings[0].millis ?? 0), Date.now() - (readings[0].localTime ?? 0));
 
       scheduleChartUpdate();
     } catch (error) {
@@ -1088,11 +1082,19 @@
                     updateDevices(newReading);
 
                     const cutoffTime = Date.now() - syncDelta - settings.chart_window_s.value * 1000;
-                    const firstValidIndex = readings.findIndex(r => (r.millis ?? 0) >= cutoffTime);
+                    const firstValidIndex = readings.findIndex(r => ((r.millis ?? 0) >= cutoffTime) || ((r.localTime ?? 0) >= Date.now() - settings.chart_window_s.value * 1000));
                     if (firstValidIndex > 0) {
                       readings = readings.slice(firstValidIndex);
                     }
-                    
+
+                    while (
+                      readings.length > 0 &&
+                        ((newReading.millis - (readings[0].millis ?? 0) > settings.chart_window_s.value * 1000) ||  //the first and last reading are more than chartWindow seconds apart
+                        (Date.now() - (readings[0].localTime ?? 0) > settings.chart_window_s.value * 1000))  //the first reading is older than chartWindow seconds
+                    ) {
+                      readings.shift();
+                    }
+
                     currentPleasure = Number(newReading.pleasure);
                     scheduleChartUpdate();
 
