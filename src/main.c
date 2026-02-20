@@ -255,12 +255,17 @@ void app_main() {
     ESP_ERROR_CHECK(ret);
 
     spiffs_init();
+    ESP_LOGI(TAG, "SPIFFS initialization returned.");
     config_init();
+    ESP_LOGI(TAG, "Config initialization returned.");
     eom_hal_led_init();
+    ESP_LOGI(TAG, "LED initialization returned.");
     orgasm_control_init();
+    ESP_LOGI(TAG, "Orgasm control initialization returned.");
 
     if (MOTOR1_ENABLED || MOTOR2_ENABLED) {
         eom_hal_init_motor();
+        ESP_LOGI(TAG, "Motor initialization returned.");
     }
 
 
@@ -287,19 +292,23 @@ void app_main() {
 
     if (Config.bt_on) {
         ble_host_config_init();
+        ESP_LOGI(TAG, "Bluetooth initialization returned.");
     }
 
 
     // Initialize WiFi
     if (Config.wifi_on) {
         http_server_init();
+        ESP_LOGI(TAG, "HTTP Server initialization returned.");
         wifi_manager_init();
+        ESP_LOGI(TAG, "WiFi Manager initialization returned.");
+        ESP_LOGI(TAG, "IP Address: %s", wifi_manager_get_local_ip());
     }
 
 
     ESP_LOGI(TAG, "System initialization complete.");
-    ESP_LOGI(TAG, "IP Address: %s", wifi_manager_get_local_ip());
     xTaskCreate(main_task, "MAIN", 1024 * 12, NULL, tskIDLE_PRIORITY + 1, NULL);
     xTaskCreate(ble_task, "BT", 1024 * 12, NULL, tskIDLE_PRIORITY + 2, NULL);
     xTaskCreate(sleep_monitor_task, "SLEEP", 1024 * 4, NULL, tskIDLE_PRIORITY, NULL);
+    ESP_LOGI(TAG, "Tasks created, entering main loop.");
 }   

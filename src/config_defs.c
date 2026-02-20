@@ -68,7 +68,11 @@ esp_err_t config_init(void) {
     err = config_load_from_sd(Config._filename, &Config);
     if (err != ESP_OK) goto defaults;
 
+    ESP_LOGI(TAG, "Config loaded from SD: %s\n", Config._filename);
+
     nvs_close(nvs);
+
+    ESP_LOGI(TAG, "Config initialization complete.");
     return ESP_OK;
 
 defaults:

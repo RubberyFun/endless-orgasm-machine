@@ -2,6 +2,8 @@
   import { onMount } from "svelte";
   import type { Action } from "svelte/action";
     import { run } from "svelte/legacy";
+  import { Capacitor } from '@capacitor/core';
+  import { BleClient } from '@capacitor-community/bluetooth-le';
   import BTLED from "./BTLED.svelte";
   import OSSM from "./OSSM.svelte";
   import DeviceList from "./ButtplugConnector.svelte";
@@ -12,6 +14,9 @@
   let BTLEDconnected = $state(false);
   let deviceComponent: any;
   let deviceList = $state([]); // List of Buttplug devices
+  
+  // Detect if running on iOS or Android via Capacitor
+  const isNativeMobile = Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android';
 
   let isSSL = window.location.protocol === "https:";
   let wssUrl = $state(
@@ -392,8 +397,11 @@
   let syncDelta = $state(0) as number;
   let lastConnection = $state("bt") as string;
 
-  let mainSend: any = null;
-  let btDevice: any = null;
+  let btDeviceId: string | null = null;
+  const BT_SERVICE_UUID = "00006969-0000-1000-8000-00805f9b34fb";
+  const BT_READINGS_CHAR = "0000696a-0000-1000-8000-00805f9b34fb";
+  const BT_CONTROL_CHAR = "0000696b-0000-1000-8000-00805f9b34fb";
+  const BT_CONFIG_CHAR = "0000696c-0000-1000-8000-00805f9b34fb";
   let socket = $state() as WebSocket;
 
   let showSettings = $state(false);
@@ -691,7 +699,9 @@
 
   function handleOpen() {
     isWsConnected = true;
-    btDevice.disconnect();
+    if (btDeviceId) {
+      BleClient.disconnect(btDeviceId).catch(err => console.error('Error disconnecting BT:', err));
+    }
     isBtConnected = false;
     syncDelta = 0;
     console.log("WebSocket connection established");
@@ -715,7 +725,9 @@
           //should I just let bluetooth handle its state by itself?
           isBtConnected = false;
           syncDelta = 0;
-          btDevice?.disconnect();
+          if (btDeviceId) {
+            BleClient.disconnect(btDeviceId).catch(err => console.error('Error disconnecting BT:', err));
+          }
         }
       }
     }, 5000); // Check for stale data every 5 seconds
@@ -735,20 +747,20 @@
       });
       socket.send(msg);
       console.log(`Sent ${setting_name} change:`, value);
-    } else if (isBtConnected && mainSend != null) {
-      mainSend.writeValue(
-        new Uint8Array([
-          0x02, // Command identifier for setting change
-          ...new TextEncoder().encode(setting_name),
-          0x3A, // Separator ':'
-          ...new TextEncoder().encode(value.toString()), // Send value in hexadecimal
-        ])
-      ).then(() => {
-        console.log(`Sent ${setting_name} change via Bluetooth:`,  value);
-      }).catch((error: any) => {
-        console.error('Error sending setting change via Bluetooth:', error, setting_name, value);
-      });
-      // Handle Bluetooth connection case
+    } else if (isBtConnected && btDeviceId) {
+      const data = new Uint8Array([
+        0x02, // Command identifier for setting change
+        ...new TextEncoder().encode(setting_name),
+        0x3A, // Separator ':'
+        ...new TextEncoder().encode(value.toString()),
+      ]);
+      const dataView = new DataView(data.buffer);
+      BleClient.write(btDeviceId, BT_SERVICE_UUID, BT_CONTROL_CHAR, dataView)
+        .then(() => {
+          console.log(`Sent ${setting_name} change via Bluetooth:`,  value);
+        }).catch((error: any) => {
+          console.error('Error sending setting change via Bluetooth:', error, setting_name, value);
+        });
     }
   }
 
@@ -758,7 +770,7 @@
         [setting_name]: value,
       });
       socket.send(msg);
-    } else if (isBtConnected) {
+    } else if (isBtConnected && btDeviceId) {
       let currentMode: number = setting_name == "setMode" ? runModes.indexOf(String(value)) : lastNumericValue("runMode");
       let btData;
       if (setting_name == "setMotor") {
@@ -774,7 +786,8 @@
         ]);
       }
       console.log(`sending ${setting_name} change via Bluetooth:`, btData);
-      mainSend.writeValue(btData).then(() => {
+      const dataView = new DataView(btData.buffer);
+      BleClient.write(btDeviceId, BT_SERVICE_UUID, BT_CONTROL_CHAR, dataView).then(() => {
         console.log(`Sent ${setting_name} change via Bluetooth:`, value);
       }).catch((error: any) => {
         console.error('Error sending setting change via Bluetooth:', error);
@@ -890,24 +903,23 @@
     }
   }
 
-  function onDisconnected(event: any) {
-    const eomDevice = event.target;
-    mainSend = null;
-    btDevice = null;
-    console.log(`Device ${eomDevice.name} is disconnected.`);
+  function onDisconnected(deviceId: string) {
+    btDeviceId = null;
+    console.log(`Device ${deviceId} is disconnected.`);
     isBtConnected = false;
     syncDelta = 0;
   }
 
   function sendConfigRequest() {
-    if (isBtConnected && mainSend != null) {
-      mainSend.writeValue(
-        new Uint8Array([0x03]) // Command identifier for config request
-      ).then(() => {
-        console.log('Sent configuration request via Bluetooth.');
-      }).catch((error: any) => {
-        console.error('Error sending configuration request via Bluetooth:', error);
-      });
+    if (isBtConnected && btDeviceId) {
+      const data = new Uint8Array([0x03]);
+      const dataView = new DataView(data.buffer);
+      BleClient.write(btDeviceId, BT_SERVICE_UUID, BT_CONTROL_CHAR, dataView)
+        .then(() => {
+          console.log('Sent configuration request via Bluetooth.');
+        }).catch((error: any) => {
+          console.error('Error sending configuration request via Bluetooth:', error);
+        });
     }
   }
 
@@ -940,7 +952,7 @@
     }, 200);
   }
 
-  const bt = (navigator as any).bluetooth; 
+  const bt = true; // BleClient is always available via Capacitor
   window.onresize = () => {
     chartReady();
   };
@@ -1015,42 +1027,42 @@
     });
   }
 
-  function btConnect() {
-    if (!bt) {
-      alert('Web bluetooth is not available on iOS devices or Firefox.');
-      return;
-    }
+  async function btConnect() {
     if (isBtConnected) {
-      console.log('Disconnecting from Bluetooth device:', btDevice);
-      btDevice?.gatt.disconnect();
+      console.log('Disconnecting from Bluetooth device:', btDeviceId);
+      if (btDeviceId) {
+        await BleClient.disconnect(btDeviceId);
+      }
       isBtConnected = false;
+      btDeviceId = null;
       syncDelta = 0;
     } else {
-      bt.requestDevice({
-        optionalServices: [0x6969, 0x696A, 0x696B],
-        filters: [{
+      try {
+        await BleClient.initialize();
+        
+        const device = await BleClient.requestDevice({
           namePrefix: 'Libotoy',
-        }]
-      })
-        .then((eomDevice: any) => {
-          console.log('Connecting to device:', eomDevice);
-          eomDevice.addEventListener('gattserverdisconnected', onDisconnected);
-          btDevice = eomDevice;
-          eomDevice.gatt.connect()
-            .then((server: any) => {
-              lastConnection = "bt";
-              console.log('Connected to GATT server:', server);                      
-              server.getPrimaryService(0x6969).then((service: any) => {
-                console.log('Got primary service:', service);
-
-                //readings
-                service.getCharacteristic(0x696a).then((characteristic: any) => {
-                  console.log('Got characteristic:', characteristic);
-                  syncDelta = 0;
-
-                  characteristic.addEventListener('characteristicvaluechanged', (event: any) => {
-                    const value = event.target.value;
-                    const data = new Uint8Array(value.buffer);
+          optionalServices: [BT_SERVICE_UUID],
+        });
+        
+        btDeviceId = device.deviceId;
+        console.log('Connecting to device:', device.name);
+        
+        await BleClient.connect(device.deviceId, (deviceId) => {
+          console.log(`Device ${deviceId} disconnected`);
+          onDisconnected(deviceId);
+        });
+        
+        lastConnection = "bt";
+        console.log('Connected to BLE device');                      
+        // Setup readings characteristic notifications
+        await BleClient.startNotifications(
+          device.deviceId,
+          BT_SERVICE_UUID,
+          BT_READINGS_CHAR,
+          (value) => {
+            const data = new Uint8Array(value.buffer);
+            syncDelta = 0;
                     //console.log('Received data:', data);
                     let newReading: eomReading = {
                       pressure: data[0]* 16, // scale to 0-4096
@@ -1095,37 +1107,24 @@
                       readings.shift();
                     }
 
-                    currentPleasure = Number(newReading.pleasure);
-                    scheduleChartUpdate();
+            currentPleasure = Number(newReading.pleasure);
+            scheduleChartUpdate();
+          }
+        );
+        console.log('Notifications started for readings characteristic');
+        socket?.close();
+        isWsConnected = false;
+        isBtConnected = true;
 
-                  });
-
-                  characteristic.startNotifications().then(() => {
-                    console.log('Notifications started for characteristic:', characteristic.uuid);
-                    socket?.close();
-                    isWsConnected = false;
-                    isBtConnected = true;
-                  });
-
-                });
-
-
-
-                //controls
-                service.getCharacteristic(0x696b).then((characteristic: any) => {
-                  console.log('Got control characteristic:', characteristic);
-                  mainSend = characteristic;
-                  console.log('Ready to send control commands via Bluetooth.',mainSend);
-                });
-
-                //config
-                service.getCharacteristic(0x696c).then((characteristic: any) => {
-                  console.log('Got characteristic:', characteristic);
-
-                  characteristic.addEventListener('characteristicvaluechanged', (event: any) => {
-                    const value = event.target.value;
-                    // Create Uint8Array from the DataView with proper length
-                    const data = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
+        console.log('Ready to send control commands via Bluetooth.');
+        
+        // Setup config characteristic notifications
+        await BleClient.startNotifications(
+          device.deviceId,
+          BT_SERVICE_UUID,
+          BT_CONFIG_CHAR,
+          (value) => {
+            const data = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
                     
                     // Find the actual length by looking for null terminator
                     let actualLength = data.length;
@@ -1140,41 +1139,28 @@
                     const decoder = new TextDecoder();
                     const jsonString = '{' + decoder.decode(data.slice(0, actualLength)) + '}';
 
-                    try {
-                      console.log('Received config data:', jsonString, value);
-                      const configObj = JSON.parse(jsonString);
-                      for (const [key, val] of Object.entries(configObj)) {
-                        if (key in settings) {
-                          settings[key as keyof typeof settings].value = val as number;
-                        }
-                      }
-                    } catch (error) {
-                      console.error('Error parsing config JSON:', error, jsonString);
-                    }
-                  });
-
-                  characteristic.startNotifications().then(() => {
-                    console.log('Notifications started for characteristic:', characteristic.uuid);
-                    sendConfigRequest();
-                  });
-
-                });
-
-
-              })
-              .catch((error: any) => {
-                console.error('Error getting primary service:', error);
-              });
-            })
-            .catch((error: any) => {
-              console.error('Error connecting to GATT server:', error);
-            });
-        })
-        .catch((error: any) => {
-          console.error(error);
-        });
+            try {
+              console.log('Received config data:', jsonString, value);
+              const configObj = JSON.parse(jsonString);
+              for (const [key, val] of Object.entries(configObj)) {
+                if (key in settings) {
+                  settings[key as keyof typeof settings].value = val as number;
+                }
+              }
+            } catch (error) {
+              console.error('Error parsing config JSON:', error, jsonString);
+            }
+          }
+        );
+        console.log('Notifications started for config characteristic');
+        sendConfigRequest();
+        
+      } catch (error) {
+        console.error('Bluetooth connection error:', error);
+        isBtConnected = false;
+        btDeviceId = null;
+      }
     }
-
   }
 
 </script>
@@ -1202,6 +1188,7 @@
 
 <div
   class="mainContainer"
+  style={isNativeMobile ? "margin-top: 40px;" : ""}
   onclick={(e) => {
     if (e.target !== settingsDialog) settingsDialog.close();
   }}
@@ -1221,7 +1208,7 @@
           style="margin-bottom: .5%; max-width: 8vw;"
           onkeyup={(event) => {if (event.key === 'Enter') { handleConnect(); }}}
         /> --> 
-        <button
+        <!-- <button
           type="button"
           class="topButton"
           aria-label="Connect via WebSocket" 
@@ -1233,7 +1220,7 @@
             handleConnect();
           }}
         ><svg width="20" height="20" viewBox="0 0 256 193" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid"><path fill="#3F  F" d="M192.44 144.645h31.78V68.339l-35.805-35.804-22.472 22.472 26.497 26.497v63.14zm31.864 15.931H113.452L86.954 134.08l11.237-11.236 21.885 21.885h45.028l-44.357-44.441 11.32-11.32 44.357 44.358V88.296l-21.801-21.801 11.152-11.153L110.685 0H0l31.696 31.696v.084H97.436l23.227 23.227-33.96 33.96L63.476 65.74V47.712h-31.78v31.193l55.007 55.007L64.314 156.3l35.805 35.805H256l-31.696-31.529z"/></svg>
-      </button>
+      </button> -->
       </div>
 
       <div style={isWsConnected ? "visibility: hidden;" : "display: flex; align-items: center; flex-shrink: 1; min-width: 0;"}>

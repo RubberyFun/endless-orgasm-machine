@@ -1,40 +1,7 @@
 <script lang="ts">
-  interface Navigator {
-    bluetooth: {
-      requestDevice(options: RequestDeviceOptions): Promise<BluetoothDevice>;
-    };
-  }
+  import { BleClient } from '@capacitor-community/bluetooth-le';
 
-  interface RequestDeviceOptions {
-    filters: Array<{ services: number[] }>;
-  }
-
-  interface BluetoothDevice {
-    gatt?: BluetoothRemoteGATTServer;
-    addEventListener(event: string, handler: () => void): void;
-  }
-
-  interface BluetoothRemoteGATTServer {
-    connected: boolean;
-    connect(): Promise<BluetoothRemoteGATTServer>;
-    disconnect(): void;
-    getPrimaryService(service: number | string): Promise<BluetoothRemoteGATTService>;
-    getPrimaryServices(): Promise<BluetoothRemoteGATTService[]>;
-  }
-
-  interface BluetoothRemoteGATTService {
-    uuid: string;
-    getCharacteristic(characteristic: number | string): Promise<BluetoothRemoteGATTCharacteristic>;
-    getCharacteristics(): Promise<BluetoothRemoteGATTCharacteristic[]>;
-  }
-
-  interface BluetoothRemoteGATTCharacteristic {
-    uuid: string;
-    writeValue(value: BufferSource): Promise<void>;
-  }
-
-  let BTLEDdevice: BluetoothDevice | null = $state(null);
-  let BTLEDcharacteristic: BluetoothRemoteGATTCharacteristic | null = $state(null);
+  let BTLEDdeviceId: string | null = $state(null);
   let deviceConfig: LEDdevice | undefined = $state(undefined);
   let isWriting = false;
 
@@ -65,19 +32,18 @@
   async function connectBluetooth() {
     try {
       BTLEDstatus = "Connecting...";
-            
-      BTLEDdevice = await (navigator as any).bluetooth.requestDevice({
-        filters: devices.map(d => ({  // Added filters back in
-          namePrefix: d.prefix
-        })),
+      
+      // Initialize BLE client
+      await BleClient.initialize();
+      
+      // Request device with multiple name prefixes
+      const device = await BleClient.requestDevice({
+        namePrefix: devices[0].prefix, // Start with first prefix
         optionalServices: devices.map(d => d.service),
       });
 
-      if (!BTLEDdevice?.gatt) {
-        throw new Error("GATT not available");
-      }
-
-      const deviceName = (BTLEDdevice as any).name as string;
+      BTLEDdeviceId = device.deviceId;
+      const deviceName = device.name || "";
       console.log("Connected to device:", deviceName);
       
       // Determine brand from device name
@@ -86,30 +52,37 @@
         throw new Error("Unknown device type");
       }
 
-      deviceConfig.name = deviceConfig.name;
       console.log("Detected brand:", deviceConfig.name);
 
-      // Connect to GATT server
-      const server = await BTLEDdevice.gatt.connect();
-      BTLEDstatus = "Getting service...";
-
-      // Get the specific service for this device
-      const service = await server.getPrimaryService(deviceConfig.service);
-      console.log("Got service:", service.uuid);
+      // Connect to device with disconnect callback and timeout
+      await BleClient.connect(
+        device.deviceId, 
+        (deviceId) => {
+          console.log(`Device ${deviceId} disconnected`);
+          BTLEDconnected = false;
+          BTLEDstatus = "No lights connected";
+          BTLEDdeviceId = null;
+          if (keepAliveInterval) {
+            clearInterval(keepAliveInterval);
+            keepAliveInterval = null;
+          }
+        },
+        { timeout: 15000 } // 15 second timeout
+      );
       
-      // Get the TX characteristic
-      BTLEDcharacteristic = await service.getCharacteristic(deviceConfig.tx);
-      console.log("Got characteristic:", BTLEDcharacteristic.uuid);
-      
+      console.log("Connected successfully");
       BTLEDconnected = true;
       BTLEDstatus = "Connected";
 
+      console.log(deviceConfig.keepalive);
       if (deviceConfig.keepalive) {
+        console.log("Starting keepalive interval");
         keepAliveInterval = setInterval(async () => {
-          if (BTLEDconnected && BTLEDcharacteristic) {
+          if (BTLEDconnected && BTLEDdeviceId) {
             const keepaliveData = new Uint8Array(deviceConfig!.keepalive!.match(/.{1,2}/g)!.map(byte => parseInt(byte, 16)));
             try {
-              await BTLEDcharacteristic.writeValue(keepaliveData);
+              const dataView = new DataView(keepaliveData.buffer);
+              await BleClient.writeWithoutResponse(BTLEDdeviceId, deviceConfig!.service, deviceConfig!.tx, dataView);
               console.log("Sent keepalive");
             } catch (error) {
               console.error("Failed to send keepalive:", error);
@@ -123,36 +96,34 @@
       }
 
       if (deviceConfig.startup) {
+        console.log("Sending startup sequence");
         const startupData = new Uint8Array(deviceConfig!.startup!.match(/.{1,2}/g)!.map(byte => parseInt(byte, 16)));
         try {
-          await BTLEDcharacteristic.writeValue(startupData);
+          const dataView = new DataView(startupData.buffer);
+          await BleClient.writeWithoutResponse(device.deviceId, deviceConfig.service, deviceConfig.tx, dataView);
           console.log("Sent startup sequence");
         } catch (error) {
           console.error("Failed to send startup sequence:", error);
         }
       }
 
-      // Handle disconnect
-      BTLEDdevice.addEventListener('gattserverdisconnected', () => {
-        BTLEDconnected = false;
-        BTLEDstatus = "No lights connected";
-        BTLEDcharacteristic = null;
-      });
-
     } catch (error) {
       console.error("Bluetooth connection failed:", error);
       BTLEDstatus = `Error: ${error instanceof Error ? error.message : String(error)}`;
       BTLEDconnected = false;
-      BTLEDcharacteristic = null;
+      BTLEDdeviceId = null;
     }
   }
 
   async function disconnect() {
-    if (BTLEDdevice?.gatt?.connected) {
-      BTLEDdevice.gatt.disconnect();
+    if (BTLEDdeviceId) {
+      try {
+        await BleClient.disconnect(BTLEDdeviceId);
+      } catch (error) {
+        console.error("Error disconnecting:", error);
+      }
     }
-    BTLEDdevice = null;
-    BTLEDcharacteristic = null;
+    BTLEDdeviceId = null;
     BTLEDconnected = false;
     if (keepAliveInterval) {
       console.log("Clearing keepalive interval");
@@ -175,7 +146,7 @@
   }
 
   export async function writeRGB(r: number, g: number, b: number) {
-    if (!BTLEDcharacteristic) {
+    if (!BTLEDdeviceId || !deviceConfig) {
       throw new Error("Not connected to Bluetooth device");
     }
     
@@ -203,7 +174,8 @@
     isWriting = true;
     console.log(`Writing RGB to ${deviceConfig?.name || "unknown device"}: ${r}, ${g}, ${b}: `, data);
     try {
-      await BTLEDcharacteristic.writeValue(data);
+      const dataView = new DataView(data.buffer);
+      await BleClient.writeWithoutResponse(BTLEDdeviceId, deviceConfig.service, deviceConfig.tx, dataView);
     } catch (error) {
       console.error("Failed writing RGB value:", error);
       throw error;
