@@ -111,7 +111,7 @@ static void main_task(void* args) {
 }
 
 static void sleep_monitor_task(void* args) {
-    if (SLEEP_GPIO < 0) {
+    if (SLEEP_GPIO < 1) {
         ESP_LOGI(TAG, "SLEEP_GPIO not configured, sleep monitor disabled");
         vTaskDelete(NULL);
         return;

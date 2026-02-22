@@ -123,6 +123,7 @@ void orgasm_control_set_pleasure(uint8_t pleasure) {
 
 void orgasm_control_init(void) {
     eom_hal_init_pressure_sensor();
+    ESP_LOGI(TAG, "Pressure sensor initialized.");
     output_state.output_mode = OC_AUTOMATIC;
     output_state.vibration_mode = Config.vibration_mode;
     output_state.edge_time_out = 10000;
@@ -130,6 +131,7 @@ void orgasm_control_init(void) {
     arousal_state.cooldown = 0; 
 
     running_average_init(&arousal_state.average, Config.pressure_smoothing);
+    ESP_LOGI(TAG, "Running average initialized with window size %d.", Config.pressure_smoothing);
     orgasm_state.orgasm_count = 0;  
     // if (orgasm_state._h_orgasm == NULL) {
     //     orgasm_state._h_orgasm =

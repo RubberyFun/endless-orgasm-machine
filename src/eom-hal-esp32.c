@@ -24,7 +24,7 @@
     hx711_t dev =
     {
         .dout = PRESSURE_SDA,
-        .pd_sck = PRESSURE_SCK,
+        .pd_sck = PRESSURE_SCL,
         .gain = HX711_GAIN_A_128
     };
 #else
@@ -72,9 +72,11 @@ uint16_t flash_interval = 250;
 
 
 void eom_hal_init_pressure_sensor(void) {
+    ESP_LOGI(TAG, "Initializing pressure sensor...");
     if (PRESSURE_SENSOR == PRESSURE_SENSOR_ANALOG) {
-
+        ESP_LOGI(TAG, "Initializing analog pressure sensor...");
         gpio_reset_pin(PRESSURE_GPIO);
+        ESP_LOGI(TAG, "Analog pressure sensor GPIO pin %d reset.", PRESSURE_GPIO);
 
         adc_atten_t esp_sensitivity = Config.sensor_sensitivity >= 75 ? ADC_ATTEN_DB_0 
                                     : (Config.sensor_sensitivity >= 50 ? ADC_ATTEN_DB_2_5 
@@ -86,20 +88,26 @@ void eom_hal_init_pressure_sensor(void) {
         };
 
         adc_oneshot_new_unit(&adc_init_cfg, &adc_handle);
+        ESP_LOGI(TAG, "ADC unit %d initialized for pressure sensor.", adc_init_cfg.unit_id);
         ESP_ERROR_CHECK(adc_oneshot_config_channel(adc_handle, PRESSURE_GPIO, &adcCfg));
+        ESP_LOGI(TAG, "ADC channel %d configured with attenuation %d and bitwidth %d.", PRESSURE_GPIO, adcCfg.atten, adcCfg.bitwidth);
 
         eom_hal_setup_pressure_ambient();
+        ESP_LOGI(TAG, "Ambient pressure set to %d.", pressure_ambient);
 
     } else if (PRESSURE_SENSOR == PRESSURE_SENSOR_I2C) {
+        ESP_LOGI(TAG, "Initializing I2C pressure sensor...");
 
         // Reset GPIO pins to ensure clean state before I2C initialization
         gpio_reset_pin(PRESSURE_SDA);
-        gpio_reset_pin(PRESSURE_SCK);
+        gpio_reset_pin(PRESSURE_SCL);
+
+        ESP_LOGI(TAG, "I2C pressure sensor GPIO pins reset: SDA=%d, SCL=%d", PRESSURE_SDA, PRESSURE_SCL);
 
         i2c_master_bus_config_t i2c_mst_config = {
             .clk_source = I2C_CLK_SRC_DEFAULT,
             .i2c_port = I2C_NUM_0,
-            .scl_io_num = PRESSURE_SCK,
+            .scl_io_num = PRESSURE_SCL,
             .sda_io_num = PRESSURE_SDA,
             .glitch_ignore_cnt = 7,
             .flags.enable_internal_pullup = true,
@@ -108,15 +116,21 @@ void eom_hal_init_pressure_sensor(void) {
         i2c_master_bus_handle_t bus_handle;
         ESP_ERROR_CHECK(i2c_new_master_bus(&i2c_mst_config, &bus_handle));
         
-        ESP_LOGI(TAG, "I2C master bus initialized on SDA:%d SCL:%d", PRESSURE_SDA, PRESSURE_SCK);
+        ESP_LOGI(TAG, "I2C master bus initialized on SDA:%d SCL:%d", PRESSURE_SDA, PRESSURE_SCL);
         
         // Scan I2C bus to verify sensor is present
         mpr_scan_i2c_bus(bus_handle);
+
+        ESP_LOGI(TAG, "Adding pressure sensor device to I2C bus...");
         
         i2c_device_config_t dev_cfg;
         mpr_dev_config(&dev_cfg);  //not going to bother with device selection yet, just MPR for now
 
+        ESP_LOGI(TAG, "Device config for pressure sensor: address=0x%02X, addr_len=%d, clk_speed=%d", dev_cfg.device_address, dev_cfg.dev_addr_length, dev_cfg.scl_speed_hz);
+
         ESP_ERROR_CHECK(i2c_master_bus_add_device(bus_handle, &dev_cfg, &dev_handle));
+
+        ESP_LOGI(TAG, "Pressure sensor device added to I2C bus with address 0x%02X", dev_cfg.device_address);
 
     } else if (PRESSURE_SENSOR == PRESSURE_SENSOR_SPI) {
         //SPI support eventually?
@@ -125,14 +139,21 @@ void eom_hal_init_pressure_sensor(void) {
 
 
 uint16_t eom_hal_get_pressure_reading(void) {
+    esp_err_t r = 0;
     if (PRESSURE_SENSOR == PRESSURE_SENSOR_ANALOG) {
 
         int raw = 0;
         
-        adc_oneshot_read(adc_handle, PRESSURE_GPIO, &raw);  
-        
+        r = adc_oneshot_read(adc_handle, PRESSURE_GPIO, &raw);  
+        if (r != ESP_OK)
+        {
+            ESP_LOGE(TAG, "Could not read data: %d (%s)\n", r, esp_err_to_name(r));
+            return 0;
+        }
+
         int adjusted = raw - pressure_ambient;
         if (adjusted < 0) {
+            ESP_LOGW(TAG, "Pressure reading below ambient, resetting ambient: %d - %d", raw, pressure_ambient);
             adjusted = 0;
             eom_hal_setup_pressure_ambient();
         }
@@ -143,7 +164,6 @@ uint16_t eom_hal_get_pressure_reading(void) {
 
     } else if (PRESSURE_SENSOR == PRESSURE_SENSOR_I2C) {     
         int32_t data = 0;
-        esp_err_t r = 0;
 
         r = mpr_read_pressure(dev_handle, &data);
 
@@ -156,6 +176,8 @@ uint16_t eom_hal_get_pressure_reading(void) {
         int32_t adjusted = data - pressure_ambient;
         if (adjusted < 0) {
             adjusted = 0;
+            ESP_LOGW(TAG, "Pressure reading below ambient, resetting ambient: %" PRIi32 " - %" PRIi32, data, pressure_ambient);
+            eom_hal_setup_pressure_ambient();
         }
         
         //MPR range 24 bit (0xFFFFFF)...EOM logic expects 12 bit
@@ -199,6 +221,7 @@ uint8_t eom_hal_get_sensor_sensitivity(void) {
 }
 
 void eom_hal_setup_pressure_ambient(void) {
+    ESP_LOGI(TAG, "Setting up ambient pressure...");
     uint16_t readings[10];
     uint32_t sum = 0;
         
@@ -261,6 +284,7 @@ void eom_hal_init_motor(void) {
 //=== LED
 
 void eom_hal_set_led_mono(uint8_t on) {
+    if (LED_GPIO < 0) return; //no LED configured
     if (on) {
         gpio_set_level(LED_GPIO, 1);
     } else {
@@ -269,6 +293,7 @@ void eom_hal_set_led_mono(uint8_t on) {
 }
 
 void eom_hal_led_task(void *pvParameter) {
+    if (LED_GPIO < 0) return; //no LED configured
     while (1) {
         eom_hal_led_tick();
         vTaskDelay(10 / portTICK_PERIOD_MS); //check every 10ms
@@ -276,6 +301,7 @@ void eom_hal_led_task(void *pvParameter) {
 }
 
 void eom_hal_led_tick(void) {
+    if (LED_GPIO < 0) return; //no LED configured
     if (is_flashing) {
         unsigned long current_time = esp_timer_get_time() / 1000UL;
         if (current_time - last_flash >= flash_interval) {
@@ -292,6 +318,7 @@ void eom_hal_led_tick(void) {
 }
 
 void eom_hal_set_rgb(uint8_t r, uint8_t g, uint8_t b) {
+    if (LED_GPIO < 0) return; //no LED configured
     
     // Skip update only if color unchanged
     if (!is_flashing &&  (led_color.r == r && led_color.g == g && led_color.b == b)) {
@@ -357,8 +384,10 @@ RGBColor eom_hal_get_rgb_color() {
 
 void eom_hal_led_init(void)
 {
+    if (LED_GPIO < 0) return; //no LED configured
     gpio_reset_pin(LED_GPIO);
     gpio_set_direction(LED_GPIO, GPIO_MODE_OUTPUT);
+    ESP_LOGI(TAG, "LED GPIO %d initialized as output", LED_GPIO);
     if (LED_TYPE == LED_TYPE_MONO) {
         eom_hal_set_rgb_color(&rgb_white);
         eom_hal_set_led_flashing(1);
@@ -369,6 +398,7 @@ void eom_hal_led_init(void)
             gpio_reset_pin(LED_POWER);
             gpio_set_direction(LED_POWER, GPIO_MODE_OUTPUT);
             gpio_set_level(LED_POWER, 1); //power on the LED strip
+            ESP_LOGI(TAG, "LED power GPIO %d initialized and powered on", LED_POWER);
             vTaskDelay(10 / portTICK_PERIOD_MS); //give it a moment to power up
         }
         eom_hal_set_led_flashing(0);

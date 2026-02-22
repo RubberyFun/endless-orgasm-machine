@@ -76,12 +76,9 @@ typedef enum pressure_sensor_hardware pressure_sensor_hardware_t;
 //This can accept any ADC_UNIT_1 channel...so ADC_CHANNEL_0 to ADC_CHANNEL_7
 #define PRESSURE_GPIO ADC_CHANNEL_9
 #define ADC_UNIT ADC_UNIT_1
-#define PRESSURE_PICO 39
-#define PRESSURE_POCI 38
-#define PRESSURE_CS 7
 
-#define PRESSURE_SCK 40 //shared by SPI and I2C configs
-#define PRESSURE_SDA 41 //for I2C
+#define PRESSURE_SCL GPIO_NUM_48 //shared by SPI and I2C SCK configs
+#define PRESSURE_SDA GPIO_NUM_47 //for I2C
 
 //ADC_CHANNEL_0 is gpio 5 on Xaio Seed ESP32-S3, labeled D5 (LED pin is D21) 
 //ADC_CHANNEL_0 is gpio 1 on Waveshare ESP32-S3, labeled 1  (LED pin is 21, ws2812)
