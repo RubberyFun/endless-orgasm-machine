@@ -70,15 +70,31 @@ typedef enum pressure_sensor_hardware pressure_sensor_hardware_t;
 
 #define MINIMUM_BLINK_L 40
 
-#define PRESSURE_SENSOR PRESSURE_SENSOR_I2C
-#define PRESSURE_SENSOR_HARDWARE PRESSURE_SENSOR_HARDWARE_MPR
+#ifndef PRESSURE_SENSOR
+    #define PRESSURE_SENSOR PRESSURE_SENSOR_ANALOG
+#endif
+
+#ifndef PRESSURE_SENSOR_HARDWARE
+    #define PRESSURE_SENSOR_HARDWARE PRESSURE_SENSOR_HARDWARE_MPR
+#endif
+
 //which pin to read analog pressure sensor from
 //This can accept any ADC_UNIT_1 channel...so ADC_CHANNEL_0 to ADC_CHANNEL_7
-#define PRESSURE_GPIO ADC_CHANNEL_9
-#define ADC_UNIT ADC_UNIT_1
+#ifndef PRESSURE_GPIO
+    #define PRESSURE_GPIO ADC_CHANNEL_0
+#endif
 
-#define PRESSURE_SCL GPIO_NUM_48 //shared by SPI and I2C SCK configs
-#define PRESSURE_SDA GPIO_NUM_47 //for I2C
+#ifndef ADC_UNIT
+    #define ADC_UNIT ADC_UNIT_1
+#endif
+
+#ifndef PRESSURE_SCL 
+    #define PRESSURE_SCL -1 //shared by SPI and I2C SCK configs
+#endif
+
+#ifndef PRESSURE_SDA
+    #define PRESSURE_SDA -1 //for I2C
+#endif
 
 //ADC_CHANNEL_0 is gpio 5 on Xaio Seed ESP32-S3, labeled D5 (LED pin is D21) 
 //ADC_CHANNEL_0 is gpio 1 on Waveshare ESP32-S3, labeled 1  (LED pin is 21, ws2812)

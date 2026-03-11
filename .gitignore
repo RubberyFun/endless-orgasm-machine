@@ -25,6 +25,7 @@ vendor/
 tmp/
 *.code-workspace
 __pycache__/
+*.old 
 
 *.old.DS_Store
 .DS_Store
@@ -36,6 +37,8 @@ platformio.vcxproj.user
 platformio.log
 dependencies.lock
 
+sdkconfig.*
+!sdkconfig.defaults
 # Buttplug Build Artifacts
 eomui/buttplug/**
 !eomui/buttplug/buttplug.mjs

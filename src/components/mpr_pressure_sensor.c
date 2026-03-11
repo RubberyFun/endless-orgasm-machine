@@ -13,7 +13,6 @@ void mpr_dev_config(i2c_device_config_t* config) {
 }
 
 esp_err_t mpr_read_pressure(i2c_master_dev_handle_t dev_handle, int32_t* pressure) {
-    //esp_log_level_set(TAG, ESP_LOG_DEBUG);
     uint8_t data[MPR_PRESSURE_RESPONSE_LEN];
     esp_err_t ret = ESP_FAIL;
     uint8_t status = 0;

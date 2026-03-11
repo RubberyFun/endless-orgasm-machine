@@ -160,6 +160,7 @@ uint16_t eom_hal_get_pressure_reading(void) {
         
         //adjusted *= pressure_sensitivity;  //if we go the software multiplier route
         if (adjusted > EOM_HAL_PRESSURE_MAX) adjusted = EOM_HAL_PRESSURE_MAX;
+        ESP_LOGD(TAG, "12bit: %d Raw data: %d", adjusted, raw);
         return (uint16_t)adjusted;
 
     } else if (PRESSURE_SENSOR == PRESSURE_SENSOR_I2C) {     
