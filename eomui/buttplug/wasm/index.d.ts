@@ -1,4 +1,4 @@
-import { ButtplugMessage, IButtplugClientConnector } from 'buttplug';
+import { ButtplugMessage, IButtplugClientConnector } from '../../js/src/index';
 import { EventEmitter } from 'eventemitter3';
 
 export declare class ButtplugWasmClientConnector extends EventEmitter implements IButtplugClientConnector {

@@ -43,7 +43,7 @@ Also included are the source files for customizing your own plug.  They are desi
 If you go with an inflatable plug you're on your own...There are not yet any files for enclosing the electronics and securing them...there are a million different products you could buy anyways so nothing could be made to fit.  If there is demand I'll post a simple box.
 
 ## Building the software
-- Install [VSCode](https://code.visualstudio.com/) with the [PlatformIO](https://platformio.org/) extension
+- Install [VSCode](https://code.visualstudio.com/) with the [pioarduino extension](https://github.com/pioarduino/platform-espressif32) (or add https://github.com/pioarduino/platform-espressif32 to the [PlatformIO](https://platformio.org/) extension)
 - Open this repo and let all the PlatformIO dependencies download
 - If you want to use websockets alongside or instead of bluetooth set "wifi_on" to true and configure your wifi ssid and password at the top of [data/config.json](data/config.json) or skip this step to let it broadcast its own access point: ```EOM```.  You can have it both ways: Set it up to connect to your home wifi but if you're away EOM will go into access point mode after it fails to find it.
 - figure out the board you're using.  For a Xiao Seeed Esp32-S3 choose '''esp32-s3-devkitm-1'''.  For Waveshare Esp32-S3 choose ```waveshare_esp32_s3_zero```.  For a generic ESP32 like Wroom choose ```esp32dev```
@@ -147,14 +147,13 @@ This is a product of the open source community.  This will always be open source
 - ui and websockets using same endpoint if possible
 - bug: arousal overflows on hardware side
 - logging from the app
-- battery monitoring
+- battery monitoring characteristic
 - add X axis on chart (seconds)
 - chart glitch on left side at startup
-- make motor pin selection more intuitive
-- Put some effort into UI styling
-- display toy battery level
-- bluetooth OTA
-- device disconnection  
+- make motor pin selection more intuitive (add motor hardware in general)
+- display toy battery levels
+- bluetooth OTA?
+- device disconnection (buttplug bug)
 - disable internal motor control option?
 - integrated screen support / ip display
 - Implement patterns?  That's a biggie
