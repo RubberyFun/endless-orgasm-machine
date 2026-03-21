@@ -7,9 +7,381 @@ import {  ButtplugClientDeviceFeature } from "../../../satvisor/buttplug-js/js/s
 import type { ButtplugMessage } from "../../../satvisor/buttplug-js/js/src/core/Messages.js";
 import { BleClient } from "@capacitor-community/bluetooth-le";
 
+  const isCapacitorNative =
+    typeof window !== "undefined" &&
+    typeof (window as any).Capacitor?.isNativePlatform === "function" &&
+    (window as any).Capacitor.isNativePlatform();
+
+  const hasWebBluetoothRequestDevice = () =>
+    typeof navigator !== "undefined" &&
+    typeof (navigator as any).bluetooth?.requestDevice === "function";
+
+  // Capacitor Bluetooth LE wrapper classes
+  const normalizeUuid = (uuid: string) => `${uuid}`.toLowerCase();
+
+  class CapacitorBluetoothRemoteGattCharacteristic extends EventTarget {
+    deviceId: string;
+    service: { uuid: string };
+    uuid: string;
+    value: any;
+    oncharacteristicvaluechanged: ((evt: MessageEvent) => void) | null;
+    private _notifying: boolean;
+
+    constructor(deviceId: string, serviceUuid: string, characteristicUuid: string) {
+      super();
+      this.deviceId = deviceId;
+      this.service = { uuid: serviceUuid };
+      this.uuid = characteristicUuid;
+      this.value = null;
+      this.oncharacteristicvaluechanged = null;
+      this._notifying = false;
+    }
+
+    async writeValue(value: any) {
+      const array = value instanceof Uint8Array ? value : new Uint8Array(value);
+      const view = new DataView(array.buffer, array.byteOffset, array.byteLength);
+      await BleClient.write(this.deviceId, this.service.uuid, this.uuid, view);
+    }
+
+    async readValue() {
+      const view = await BleClient.read(this.deviceId, this.service.uuid, this.uuid);
+      this.value = view;
+      return view;
+    }
+
+    async startNotifications() {
+      if (this._notifying) {
+        return this;
+      }
+      await BleClient.startNotifications(
+        this.deviceId,
+        this.service.uuid,
+        this.uuid,
+        (value: any) => {
+          this.value = value;
+          const evt = new MessageEvent("characteristicvaluechanged");
+          this.dispatchEvent(evt);
+          if (typeof this.oncharacteristicvaluechanged === "function") {
+            this.oncharacteristicvaluechanged(evt);
+          }
+        },
+      );
+      this._notifying = true;
+      return this;
+    }
+
+    async stopNotifications() {
+      if (!this._notifying) {
+        return this;
+      }
+      await BleClient.stopNotifications(this.deviceId, this.service.uuid, this.uuid);
+      this._notifying = false;
+      return this;
+    }
+  }
+
+  class CapacitorBluetoothRemoteGattService {
+    deviceId: string;
+    uuid: string;
+    private _characteristics: Map<string, CapacitorBluetoothRemoteGattCharacteristic>;
+    private _reportedCharacteristics: Set<string>;
+
+    constructor(deviceId: string, serviceUuid: string, characteristics: any[] = []) {
+      this.deviceId = deviceId;
+      this.uuid = serviceUuid;
+      this._characteristics = new Map();
+      this._reportedCharacteristics = new Set(
+        (characteristics || []).map((c: any) => normalizeUuid(c?.uuid ?? c)),
+      );
+    }
+
+    async getCharacteristic(characteristicUuid: string) {
+      const key = normalizeUuid(characteristicUuid);
+      if (
+        this._reportedCharacteristics.size > 0 &&
+        !this._reportedCharacteristics.has(key)
+      ) {
+        throw new Error(
+          `Characteristic ${key} not reported by service ${this.uuid} on device ${this.deviceId}`,
+        );
+      }
+      if (!this._characteristics.has(key)) {
+        this._characteristics.set(
+          key,
+          new CapacitorBluetoothRemoteGattCharacteristic(this.deviceId, this.uuid, key),
+        );
+      }
+      return this._characteristics.get(key)!;
+    }
+  }
+
+  class CapacitorBluetoothRemoteGattServer {
+    deviceId: string;
+    connected: boolean;
+    private _services: Map<string, CapacitorBluetoothRemoteGattService>;
+
+    constructor(deviceId: string, services: any[] = []) {
+      this.deviceId = deviceId;
+      this.connected = true;
+      this._services = new Map();
+      for (const service of services || []) {
+        const serviceUuid = normalizeUuid(service?.uuid ?? service);
+        this._services.set(
+          serviceUuid,
+          new CapacitorBluetoothRemoteGattService(
+            this.deviceId,
+            serviceUuid,
+            service?.characteristics || [],
+          ),
+        );
+      }
+    }
+
+    async getPrimaryService(serviceUuid: string) {
+      const key = normalizeUuid(serviceUuid);
+      if (!this._services.has(key)) {
+        throw new Error(`Service ${key} not reported by device ${this.deviceId}`);
+      }
+      return this._services.get(key)!;
+    }
+  }
+
+  class CapacitorBluetoothRemoteGatt {
+    private _device: any;
+    connected: boolean;
+    private _server: CapacitorBluetoothRemoteGattServer | null;
+
+    constructor(device: any) {
+      this._device = device;
+      this.connected = false;
+      this._server = null;
+    }
+
+    async connect() {
+      await BleClient.connect(this._device.id, () => this._device._emitDisconnected());
+      const services = await BleClient.getServices(this._device.id);
+      this.connected = true;
+      this._server = new CapacitorBluetoothRemoteGattServer(this._device.id, services || []);
+      return this._server;
+    }
+
+    get server() {
+      return this._server;
+    }
+  }
+
+  class CapacitorBluetoothDevice extends EventTarget {
+    id: string;
+    name: string;
+    gatt: CapacitorBluetoothRemoteGatt;
+    ongattserverdisconnected: ((evt: Event) => void) | null;
+
+    constructor(id: string, name?: string) {
+      super();
+      this.id = id;
+      this.name = name || "Unknown Device";
+      this.gatt = new CapacitorBluetoothRemoteGatt(this);
+      this.ongattserverdisconnected = null;
+    }
+
+    _emitDisconnected() {
+      const evt = new Event("gattserverdisconnected");
+      this.dispatchEvent(evt);
+      if (typeof this.ongattserverdisconnected === "function") {
+        this.ongattserverdisconnected(evt);
+      }
+    }
+  }
+
+  function extractRequestDeviceFilterCriteria(options: any = {}) {
+    const filters = Array.isArray(options.filters) ? options.filters : [];
+    const names = new Set<string>();
+    const namePrefixes = new Set<string>();
+    const services = new Set<string>();
+    const optionalServices = new Set<string>();
+
+    if (typeof options.name === "string" && options.name.length > 0) {
+      names.add(options.name);
+    }
+    if (typeof options.namePrefix === "string" && options.namePrefix.length > 0) {
+      namePrefixes.add(options.namePrefix);
+    }
+    if (Array.isArray(options.services)) {
+      for (const service of options.services) {
+        services.add(normalizeUuid(service));
+      }
+    }
+    if (Array.isArray(options.optionalServices)) {
+      for (const service of options.optionalServices) {
+        optionalServices.add(normalizeUuid(service));
+      }
+    }
+
+    for (const filter of filters) {
+      if (typeof filter?.name === "string" && filter.name.length > 0) {
+        names.add(filter.name);
+      }
+      if (typeof filter?.namePrefix === "string" && filter.namePrefix.length > 0) {
+        namePrefixes.add(filter.namePrefix);
+      }
+      if (Array.isArray(filter?.services)) {
+        for (const service of filter.services) {
+          const normalized = normalizeUuid(service);
+          services.add(normalized);
+          optionalServices.add(normalized);
+        }
+      }
+    }
+
+    return {
+      names: Array.from(names),
+      namePrefixes: Array.from(namePrefixes),
+      services: Array.from(services),
+      optionalServices: Array.from(optionalServices),
+    };
+  }
+
+  function matchesPostSelectionFilters(
+    deviceName: string,
+    discoveredServices: string[],
+    criteria: {
+      names: string[];
+      namePrefixes: string[];
+      services: string[];
+    },
+  ): boolean {
+    const normalizedName = (deviceName || "").toLowerCase();
+    const normalizedServices = new Set((discoveredServices || []).map(normalizeUuid));
+
+    const hasNameFilters = criteria.names.length > 0 || criteria.namePrefixes.length > 0;
+    const hasServiceFilters = criteria.services.length > 0;
+
+    const nameMatched = hasNameFilters
+      ? criteria.names.some((name) => normalizedName === name.toLowerCase()) ||
+        criteria.namePrefixes.some((prefix) => normalizedName.startsWith(prefix.toLowerCase()))
+      : false;
+
+    const serviceMatched = hasServiceFilters
+      ? criteria.services.some((service) => normalizedServices.has(normalizeUuid(service)))
+      : false;
+
+    // Requested behavior: accept if name OR service filters match.
+    if (hasNameFilters && hasServiceFilters) {
+      return nameMatched || serviceMatched;
+    }
+    if (hasNameFilters) {
+      return nameMatched;
+    }
+    if (hasServiceFilters) {
+      return serviceMatched;
+    }
+    return true;
+  }
+
+  async function ensureCapacitorBluetoothBridge() {
+    if (!isCapacitorNative) {
+      return false;
+    }
+
+    await BleClient.initialize();
+
+    const bridge = {
+      requestDevice: async (options: any) => {
+        console.log("Requesting Bluetooth device with options:", options);
+        const criteria = extractRequestDeviceFilterCriteria(options);
+        console.log("Extracted post-selection filter criteria:", criteria);
+
+        const device = await BleClient.requestDevice({
+          // Intentionally request ANY device and filter after selection.
+          optionalServices: criteria.optionalServices,
+        }).catch((err) => {
+          console.error("Error during device selection:", err);
+          throw err;
+        }).finally(() => {
+          console.log("Device selection process completed (success or failure)");
+        });
+        console.log("Device obtained:", device.deviceId, device.name, device.uuids);
+        const deviceId = (device as any).deviceId ?? (device as any).id;
+        if (!deviceId) {
+          throw new Error("Capacitor requestDevice returned no device id");
+        }
+        const deviceName = (device as any).name ?? (device as any).localName ?? "Unknown Device";
+
+        // Prefer advertisement UUIDs when available, otherwise temporarily
+        // connect and discover services for post-selection filtering.
+        let discoveredServices: string[] = Array.isArray((device as any).uuids)
+          ? (device as any).uuids.map((uuid: string) => normalizeUuid(uuid))
+          : [];
+
+        if (discoveredServices.length === 0 && criteria.services.length > 0) {
+          let connectedForDiscovery = false;
+          try {
+            await BleClient.connect(deviceId);
+            connectedForDiscovery = true;
+            const services = await BleClient.getServices(deviceId);
+            discoveredServices = (services || []).map((service: any) => normalizeUuid(service?.uuid));
+            console.log(`Discovered services for device '${deviceName}' (${deviceId}):`, discoveredServices);
+          } catch (e) {
+            console.warn("Service discovery failed during post-selection filtering:", e);
+          } finally {
+            if (connectedForDiscovery) {
+              try {
+                await BleClient.disconnect(deviceId);
+              } catch {
+                // Ignore disconnect failures in best-effort filter probing.
+              }
+            }
+          }
+        }
+
+        const accepted = matchesPostSelectionFilters(deviceName, discoveredServices, {
+          names: criteria.names,
+          namePrefixes: criteria.namePrefixes,
+          services: criteria.services,
+        });
+
+        if (!accepted) {
+          throw new Error(
+            `Selected device '${deviceName}' did not match requested name/service filters`,
+          );
+        }
+
+        console.log(`Device '${deviceName}' accepted by post-selection filters, creating BluetoothDevice wrapper`);
+
+        return new CapacitorBluetoothDevice(deviceId, deviceName);
+      },
+    };
+
+    // On Capacitor native platforms, always use the plugin-backed bridge.
+    Object.defineProperty(navigator, "bluetooth", {
+      configurable: true,
+      value: bridge,
+    });
+
+    return true;
+  }
+
+  async function initializeBluetoothTransport() {
+    if (isCapacitorNative) {
+      const bridged = await ensureCapacitorBluetoothBridge();
+      if (bridged) {
+        console.log("Capacitor BLE bridge active");
+        return true;
+      }
+      return false;
+    }
+
+    if (hasWebBluetoothRequestDevice()) {
+      console.log("Using Web Bluetooth (native browser requestDevice)");
+      return true;
+    }
+
+    console.error("Bluetooth unavailable: missing Web Bluetooth requestDevice");
+    return false;
+  }
+
 
   // Extend the ButtplugClientDevice type with custom properties
-
   export interface EOMButtplugClientDeviceControl extends ButtplugClientDeviceFeature {
     type: OutputType;
     // attributes: any[];
@@ -35,8 +407,24 @@ import { BleClient } from "@capacitor-community/bluetooth-le";
   let { deviceList = $bindable([]) }: Props = $props();
 
   let client = new ButtplugClient("EOM Client");
+  let bluetoothReady = false;
 
   async function initialize_buttplug() {
+    // Split transport strategy:
+    // - Capacitor BLE bridge on native mobile
+    // - Web Bluetooth on web/desktop when available
+    try {
+      bluetoothReady = await initializeBluetoothTransport();
+    } catch (e) {
+      console.error("Bluetooth transport initialization error:", e);
+      bluetoothReady = false;
+      return;
+    }
+
+    if (!bluetoothReady) {
+      return;
+    }
+
     client.addListener("deviceadded", async (device: ButtplugClientDevice) => {
       console.log(`Device added: ${device.name}`, device);
       let eomDevice = device as EOMButtplugClientDevice;
@@ -57,6 +445,10 @@ import { BleClient } from "@capacitor-community/bluetooth-le";
   }
 
   async function connect_to_device() {
+    if (!bluetoothReady) {
+      console.error("Bluetooth is not ready");
+      return;
+    }
     await client.startScanning();
   }
 

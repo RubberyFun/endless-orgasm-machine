@@ -16,7 +16,6 @@ usb_w = 9;
 usb_h = 3.5;
 button_w = 4.5;
 button_d = 3.5;
-switch_h = 3;
 switch_hinge_w = 1;
 seed_clearance_h = 1.5;
 seed_clearance_w = 13.5;
@@ -52,6 +51,15 @@ cap_middle_od = 27;
 wall_thickness = 2;
 tubing_od = 3;
 tubing_od_allowance = 1;
+
+switch_screw_l = 19;
+switch_screw_d = 1.5;
+switch_l = 24;
+switch_w = 11;
+switch_h = 11;
+switch_lever_l = 10;
+switch_lever_w = 4;
+switch_lever_h = 3;
 
 if (show_lid && !show_mold) 
   if (lid_offset) 
@@ -119,7 +127,7 @@ module body() {
 
     //insert for esp32
     translate([0,-box_iw/2 + seed_l/2 - wall_thickness, -box_ih/2  -.2501]) qt_py_esp32s3(); //.25 because im getting overhang artifacts when it's flush
-    translate([0, box_iw/2 - seed_l/2 + wall_thickness, -box_ih / 2 +3]) qt_py_bff();
+    //translate([0, box_iw/2 - seed_l/2 + wall_thickness, -box_ih / 2 +3]) qt_py_bff();
 
     if (!show_mold) {
 
@@ -206,7 +214,7 @@ module lid() {
     color("purple") 
       //scale([1, 1, .5])
         difference() {
-            #cuboid ([box_id + wall_thickness * 2, box_iw + wall_thickness * 3.75, box_lid_h * 2], rounding=box_fillet,edges="Z"); //lid box);
+            cuboid ([box_id + wall_thickness * 2, box_iw + wall_thickness * 3.75, box_lid_h * 2], rounding=box_fillet,edges="Z"); //lid box);
 
           //cut off top
           translate([0,0, box_lid_h/2]) 
@@ -217,17 +225,18 @@ module lid() {
 
           //esp32 cutout
           translate([0,-box_iw/2 + seed_l/2 - wall_thickness, -.5]) qt_py_esp32s3(); 
-          translate([0, box_iw/2 - seed_l/2 + wall_thickness, 2.25]) qt_py_bff();  //.25 of cheat
+          // translate([0, box_iw/2 - seed_l/2 + wall_thickness, 2.25]) qt_py_bff();  //.25 of cheat
+          translate([0, box_iw/2 - switch_l/2 + wall_thickness, switch_lever_h/2]) switch();
 
           //button press mechanism 
          // #translate([-button_w/2, -box_iw/2 + wall_thickness + button_d/2, -5])
         }
 
         //bff stays
-        translate([0, box_iw/2 - seed_l/2 + wall_thickness, 1.5]) {
-          for (side = [-1, 1]) 
-            color("green") translate([side*6,2.5,-2]) cube([2,4,2], center=true);
-        }
+        // translate([0, box_iw/2 - seed_l/2 + wall_thickness, 1.5]) {
+        //   for (side = [-1, 1]) 
+        //     color("green") translate([side*6,2.5,-2]) cube([2,4,2], center=true);
+        // }
 
         //side clips
         for (side = [-1, 1]) {
@@ -248,7 +257,7 @@ module lid() {
 
         if (preview_electronics) {
                     translate([0,-box_iw/2 + seed_l/2 - wall_thickness, -.5]) qt_py_esp32s3(); 
-                    translate([0,box_iw/2 - seed_l/2 + wall_thickness, 2.5]) qt_py_bff(); 
+                    // translate([0,box_iw/2 - seed_l/2 + wall_thickness, 2.5]) qt_py_bff(); 
         }
   }
   translate([box_id, 0, -box_ih/2 - box_lid_h - 1]) { // + .75  //box_id / 2 + wall_thickness + 5
@@ -258,22 +267,22 @@ module lid() {
           difference() {
             union() {
 
-              translate([-1,2.5, -6.5])
-                color("brown") rotate([0,90,0]) cylinder(h=button_w, d=1.6, center=true); //cube([button_w, 5, 1], center=true); 
+              // translate([-1,2.5, -6.5])
+              //   color("brown") rotate([0,90,0]) cylinder(h=button_w, d=1.6, center=true); //cube([button_w, 5, 1], center=true); 
 
-              intersection() {
-                translate([-1,2.5, -6.5])
-                  difference() {
-                    rotate([0,90,0]) cylinder(h=button_w, d=9, center=true); //cube([button_w, 5, 1], center=true); 
-                    rotate([0,90,0]) cylinder(h=button_w, d=7, center=true); //cube([button_w, 5, 1], center=true); 
-                  }
-                translate([-1,2.5, -3])
-                  color("brown") cube([button_w, 5, 2], center=true); 
-              }
+              // intersection() {
+              //   translate([-1,2.5, -6.5])
+              //     difference() {
+              //       rotate([0,90,0]) cylinder(h=button_w, d=9, center=true); //cube([button_w, 5, 1], center=true); 
+              //       rotate([0,90,0]) cylinder(h=button_w, d=7, center=true); //cube([button_w, 5, 1], center=true); 
+              //     }
+              //   translate([-1,2.5, -3])
+              //     color("brown") cube([button_w, 5, 2], center=true); 
+              // }
 
               //channel for slider arm
-              translate([-1, 2.5,1 -seed_h - switch_h - box_lid_h/2 -.25])
-                color("green") cube([.8, 5, box_lid_h+3], center=true); //channel w needed = 8
+              // translate([-1, 2.5,1 -seed_h - switch_lever_h - box_lid_h/2 -.25])
+              //   color("green") cube([.8, 5, box_lid_h+3], center=true); //channel w needed = 8
 
 
               // translate([0, seed_l/2 - button_d, .8 ])
@@ -282,15 +291,15 @@ module lid() {
               // translate([0, seed_l/2 - button_d,box_lid_h/2 + 1])
               //   color("orange") cube([.8, 5, box_lid_h + 2], center=true); 
             }
-          translate([-1, 2.5,-3])
-            color("purple") cube([ 1,3,2.4], center=true);  // cube([ 1,1.6,2.4], center=true); 
+          // translate([-1, 2.5,-3])
+          //   color("purple") cube([ 1,3,2.4], center=true);  // cube([ 1,1.6,2.4], center=true); 
 
           }
 
       }
-       scale ([1.2,1,1]) button(height=2);
+      //  scale ([1.2,1,1]) button(height=2);
     }
-     scale ([1.2,1,1]) button();
+    //  scale ([1.2,1,1]) button();
   }
 }
 overall_height = bottom_of_shaft + box_id / 2 + shaft_h + cap_bottom_h + cap_middle_h + cap_top_h + box_top_rise + wall_thickness;
@@ -317,6 +326,17 @@ if (show_mold) {
   }
 }
 
+module switch() {
+  color("red") cube([switch_w, switch_l, switch_h], center=true); //switch body
+  translate([0,0,-switch_h/2 - switch_lever_h/2]) cube([switch_lever_w, switch_lever_l, switch_lever_h], center=true); //switch body clearance
+  for (x = [-1:2:1]) translate([0,switch_screw_l/2*x,0])  {
+    color("blue") cylinder(h=switch_screw_l, d=switch_screw_d, center=true); //screw hole
+  }
+}
+
+
+
+
 module button(diameter = 2.5, height = 3, arm_h = 1.25, arm_w = .5 ) {
   translate([0,0,arm_h/2]) {
     cube([arm_w,diameter*2,arm_h], center=true); 
@@ -341,33 +361,32 @@ module qt_py_esp32s3() {
 
   //button 1 (sleep)
   translate([-button_w/2 - .75, -.5, -seed_h ]) scale ([1.2,1,1]) {
-    color("orange") cube([button_w, button_d, switch_h], center=true); //switch
+    color("orange") cube([button_w, button_d, switch_lever_h], center=true); //switch
 
-    // translate([0,0, - switch_h/2]) 
+    // translate([0,0, - switch_lever_h/2]) 
     //   rotate([0,180,0]) button(); 
 
     // translate([0,0,0]) color("transparent") 
-    //   rotate([0,180,0]) button(arm_w=1.25, arm_h=1.625+switch_h/2,height=5, diameter=3.5); 
+    //   rotate([0,180,0]) button(arm_w=1.25, arm_h=1.625+switch_lever_h/2,height=5, diameter=3.5); 
 
   }
 
   //button 2 (reset)
   translate([-button_w/2 - .75, button_d -.25, -seed_h ]) scale ([1.2,1,1]) {
-    color("orange") cube([button_w, button_d, switch_h], center=true); //switch
+    color("orange") cube([button_w, button_d, switch_lever_h], center=true); //switch
 
-    // translate([0,0, - switch_h/2]) 
+    // translate([0,0, - switch_lever_h/2]) 
     //   rotate([0,180,0]) button(height=2); 
 
     // translate([0,0,0]) color("transparent") 
-    //   rotate([0,180,0]) button(arm_w=1.25, arm_h=1.625+switch_h/2,height=5, diameter=3.5); 
-
+    //   rotate([0,180,0]) button(arm_w=1.25, arm_h=1.625+switch_lever_h/2,height=5, diameter=3.5); 
   }
 
   translate([0,  0, 0])
       color("transparent") cube([seed_clearance_w, seed_l, seed_clearance_h * 2 + seed_h], center=true); //component clearance
 
   //cutout for switch press mechanism
-  // translate([-button_w/2-1, -1.5, -seed_h - switch_h/2])
+  // translate([-button_w/2-1, -1.5, -seed_h - switch_lever_h/2])
   // difference() {
   //   color("transparent") cube([button_w + switch_hinge_w, button_d + switch_hinge_w*2, switch_h*2], center=true); 
   //   translate([ switch_hinge_w /2,0,0]) cube([button_w, button_d, switch_h*2], center=true); //magic 1
@@ -387,20 +406,20 @@ module qt_py_bff() {
 
   //slider on/off switch
   translate([-1, seed_l/2 - button_d - 3.5, -seed_h ])
-    color("orange") cube([button_w, button_d*2, switch_h], center=true); 
+    color("orange") cube([button_w, button_d*2, switch_lever_h], center=true); 
 
   //channel for slider arm
   translate([-1,1.5, -6])
     color("transparent") cube([button_w, 13, 2], center=true); 
 
-  translate([-1, 1.5,1.25 -seed_h - switch_h - box_lid_h/2 +.5])
+  translate([-1, 1.5,1.25 -seed_h - switch_lever_h - box_lid_h/2 +.5])
     color("transparent") cube([1.6, 13.5, box_lid_h], center=true); //channel w needed = 8
 
   //channel start insert for arm
   translate([-1,-3, -4])
     color("transparent") cube([button_w, 4, 2], center=true); 
 
-   color("green")  translate([-1, 2.5,1.25 -seed_h - switch_h - box_lid_h/2 + 1.5]) rotate([0,90,0]) cylinder(h=button_w, d=1.6, center=true);
+   color("green")  translate([-1, 2.5,1.25 -seed_h - switch_lever_h - box_lid_h/2 + 1.5]) rotate([0,90,0]) cylinder(h=button_w, d=1.6, center=true);
 }
 
 

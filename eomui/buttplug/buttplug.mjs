@@ -110,13 +110,6 @@ function q() {
 }
 var z = q();
 const k = /* @__PURE__ */ j(z);
-/*!
- * Buttplug JS Source Code File - Visit https://buttplug.io for more info about
- * the project. Licensed under the BSD 3-Clause license. See LICENSE file in the
- * project root for full license information.
- *
- * @copyright Copyright (c) Nonpolynomial Labs LLC. All rights reserved.
- */
 var W = /* @__PURE__ */ ((s) => (s[s.Off = 0] = "Off", s[s.Error = 1] = "Error", s[s.Warn = 2] = "Warn", s[s.Info = 3] = "Info", s[s.Debug = 4] = "Debug", s[s.Trace = 5] = "Trace", s))(W || {});
 class H {
   /** Timestamp for the log message */
@@ -264,13 +257,6 @@ class b extends k {
     t <= this.maximumConsoleLogLevel && console.log(n.FormattedMessage), t <= this.maximumEventLogLevel && this.emit("log", n);
   }
 }
-/*!
- * Buttplug JS Source Code File - Visit https://buttplug.io for more info about
- * the project. Licensed under the BSD 3-Clause license. See LICENSE file in the
- * project root for full license information.
- *
- * @copyright Copyright (c) Nonpolynomial Labs LLC. All rights reserved.
- */
 class m extends Error {
   get ErrorClass() {
     return this.errorClass;
@@ -571,10 +557,10 @@ class N extends k {
       throw new E(`Feature index ${e} does not support type ${t} for device ${this.name}`);
   }
   hasOutput(e) {
-    return this._features.values().filter((t) => t.hasOutput(e)).toArray().length > 0;
+    return Array.from(this._features.values()).some((t) => t.hasOutput(e));
   }
   hasInput(e) {
-    return this._features.values().filter((t) => t.hasInput(e)).toArray().length > 0;
+    return Array.from(this._features.values()).some((t) => t.hasInput(e));
   }
   async runOutput(e) {
     let t = [];
@@ -603,13 +589,6 @@ class N extends k {
     this.emit("deviceremoved");
   }
 }
-/*!
- * Buttplug JS Source Code File - Visit https://buttplug.io for more info about
- * the project. Licensed under the BSD 3-Clause license. See LICENSE file in the
- * project root for full license information.
- *
- * @copyright Copyright (c) Nonpolynomial Labs LLC. All rights reserved.
- */
 class te {
   constructor(e) {
     this._useCounter = e;
@@ -647,13 +626,6 @@ class te {
     return t;
   }
 }
-/*!
- * Buttplug JS Source Code File - Visit https://buttplug.io for more info about
- * the project. Licensed under the BSD 3-Clause license. See LICENSE file in the
- * project root for full license information.
- *
- * @copyright Copyright (c) Nonpolynomial Labs LLC. All rights reserved.
- */
 class se extends m {
   constructor(e) {
     super(e, w.ERROR_UNKNOWN);

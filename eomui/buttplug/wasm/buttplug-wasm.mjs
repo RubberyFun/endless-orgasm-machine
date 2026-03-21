@@ -6,7 +6,7 @@ let __tla = (async () => {
     constructor() {
       super(), this._connected = false, this.initialize = async () => {
       }, this.connect = async () => {
-        await e.maybeLoadWasm(), this.client = e.wasmInstance.buttplug_create_embedded_wasm_server((s) => {
+        await e.maybeLoadWasm(), await e.activateLogging("debug"), this.client = e.wasmInstance.buttplug_create_embedded_wasm_server((s) => {
           this.emitMessage(s);
         }, this.serverPtr), this._connected = true;
       }, this.disconnect = async () => {
@@ -23,7 +23,7 @@ let __tla = (async () => {
       return this._connected;
     }
   }, _a._loggingActivated = false, _a.maybeLoadWasm = async () => {
-    e.wasmInstance == null && (e.wasmInstance = await import("./buttplug_wasm-DGceASRD.js").then(async (m) => {
+    e.wasmInstance == null && (e.wasmInstance = await import("./buttplug_wasm-7s8FaBJM.js").then(async (m) => {
       await m.__tla;
       return m;
     }));
@@ -32,7 +32,7 @@ let __tla = (async () => {
       console.log("Logging already activated, ignoring.");
       return;
     }
-    console.log("Turning on logging."), e.wasmInstance.buttplug_activate_env_logger(s);
+    console.log("Turning on logging."), e.wasmInstance.buttplug_activate_env_logger(s), _a._loggingActivated = true;
   }, _a);
 })();
 export {
