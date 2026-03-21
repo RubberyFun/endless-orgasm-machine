@@ -4,16 +4,19 @@
 ### It knows...
 What will surprise you most is how accurate it is that you only have a few moments left.  In this day and age algorithms are a respected part of our lives...this one knows you better than yourself.
 
-Have you ever cut-off a sneeze before it happened and found it a conflicting blend of sensations?  Have you ever stopped going before your orgasm so you could last a bit longer?  If you're not afraid to use a buttplug and you're ready for an amazing experience this is for you.  
+Have you ever cut-off a sneeze before it happened and found it a conflicting blend of sensations?  Have you ever stopped before your orgasm so you could last a bit longer?  If you're not afraid to use a buttplug and you're ready for an amazing experience this is for you.  
 
-It is not a sex-toy in the traditional sense because it doesn't provide pleasure unless you add in a vibrator or connect it wirelessly to other toys.  They provide the pleasure, EOM tells them when to stop and when they can start again.
+It is not a sex-toy in the traditional sense because it doesn't provide pleasure unless you connect it to other toys.  It is an arousal sensor.  Other devices provide the pleasure, EOM tells them when to stop and when they can start again. (The exception being if you build in an integrated vibrator or e-stim plug)
 
 ### The science!
 Using an inflatable butt plug to detect pressure changes indicative of pelvic floor contractions, this software, and associated hardware, is used to detect when the user is approaching orgasm and control stimulation accordingly. The net result: automated edging and orgasm denial or enhancement.
 
 ### But I like orgasms...
 
-Having to wait for it while being right at the edge makes it more intense!  Trying to resist getting close is a turn-on for some.  When you're ready to end the edging you can use "Control: Orgasm" to allow you to finish after a chosen number of minutes or near-orgasms... if you've had enough simply set it to "Control: Manual" and take care of things manually.  It can also be used after orgasms to determine exactly when the refractory period has subsided enough to begin the next round of pleasuring. 
+Having to wait for it while being right at the edge makes it more intense!  Trying to resist getting close is a turn-on for some.  When you're ready to end the edging you can use "Control: Orgasm" to allow you to finish after a chosen number of minutes or near-orgasms... if you've had enough simply set it to "Control: Manual" and take control of the toys manually.  It can also be used after orgasms to determine exactly when the refractory period has subsided enough to begin the next round of pleasuring. 
+
+### Bonus feature:
+You could use the app by itself to control multiple sex toys at once without am EOM being involved.  The app by itself is a versatile and simple control hub.
 
 
 ## Web UI
@@ -139,19 +142,20 @@ This is a product of the open source community.  This will always be open source
 
 ### To-do priority
 - connect to DG Labs Coyote
+- support for more bluetooth LED types
 - add build walkthrough to docs and more examples, pinouts and schematics
 - audio buzzer in ui for cooldown!
 - add a config save button so setting changes aren't immediately permanent (save toy settings also/separately?)
 - do canvas drawing to offscreen element for efficiency
 - integrate smoothing filters into pressure readings
-- ui and websockets using same endpoint if possible
+<!-- - ui and websockets using same endpoint if possible -->
 - bug: arousal overflows on hardware side
 - logging from the app
 - battery monitoring characteristic
 - add X axis on chart (seconds)
 - chart glitch on left side at startup
 - make motor pin selection more intuitive (add motor hardware in general)
-- display toy battery levels
+- display individual toy battery levels
 - bluetooth OTA?
 - device disconnection (buttplug bug)
 - disable internal motor control option?

@@ -8,7 +8,7 @@ tmp/*
 cmake-build-debug/
 cmake-build-release/
 
-build/
+#build/
 dist/
 
 serials.yml

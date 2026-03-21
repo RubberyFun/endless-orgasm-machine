@@ -1,2 +1,8 @@
 /build/*
-!/build/.npmkeep
+!/build/outputs/
+/build/outputs/*
+!/build/outputs/apk/
+/build/outputs/apk/*
+!/build/outputs/apk/release/
+/build/outputs/apk/release/*
+!/build/outputs/apk/release/*.apk

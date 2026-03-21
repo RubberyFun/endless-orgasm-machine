@@ -1,4 +1,7 @@
 apply plugin: 'com.android.application'
+def keystorePropertiesFile = rootProject.file("../../.local/keystore.properties")
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
 android {
     namespace = "com.rubberyfun.eom"
@@ -8,7 +11,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 7
-        versionName "1.5.5"
+        versionName "0.0.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -17,9 +20,45 @@ android {
         }
     }
     buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        // release {
+        //     minifyEnabled false
+        //     proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        //     // signingConfig signingConfigs.debug
+        // }
+        signingConfigs {
+            // debug {
+            //     keyAlias keystoreProperties['keyAlias']
+            //     keyPassword keystoreProperties['keyPassword']
+            //     storeFile file(keystoreProperties['storeFile'])
+            //     storePassword keystoreProperties['storePassword']
+            // }
+        }    // Set base archive name for both APKs and AABs
+        setProperty("archivesBaseName", "eom-${defaultConfig.versionName}")
+
+        applicationVariants.all { variant ->
+            variant.outputs.all {
+                outputFileName = "eom-${variant.versionName}.${variant.packageApplicationProvider.get() ? 'apk' : 'aab'}"
+            }
+        }
+    }
+}
+
+// Rename AAB in the release directory after bundle tasks complete
+tasks.whenTaskAdded { task ->
+    if (task.name == 'bundleRelease') {
+        task.doLast {
+            def releaseDir = file("$projectDir/release")
+            if (releaseDir.exists()) {
+                releaseDir.listFiles().each { file ->
+                    if (file.name.endsWith('.aab')) {
+                        def version = android.defaultConfig.versionName
+                        def newName = "eom-${version}.aab"
+                        def newFile = new File(releaseDir, newName)
+                        file.renameTo(newFile)
+                        println "Renamed ${file.name} to ${newName}"
+                    }
+                }
+            }
         }
     }
 }
