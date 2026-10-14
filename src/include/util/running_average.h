@@ -13,7 +13,7 @@ typedef struct running_average {
     size_t window;
     size_t index;
     uint16_t value;
-    uint16_t sum;
+    uint32_t sum; // 32-bit: window * 4095 overflows 16 bits once window > 16
     uint16_t averaged;
 } running_average_t;
 

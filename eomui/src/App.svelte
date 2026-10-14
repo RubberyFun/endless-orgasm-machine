@@ -390,6 +390,7 @@
   let fudge: number = 2;
   let arousalThicknessMultiplier: number = 4;
   let currentPleasure = $state(0) as number;
+  let pleasureLockedUntil = 0; //don't let incoming readings move the slider while the user is dragging it
   let maxDenied = $state(20) as number;
   let thresholdStep = 100;
   let isWsConnected = $state(false) as boolean;
@@ -1107,7 +1108,9 @@
                       readings.shift();
                     }
 
-            currentPleasure = Number(newReading.pleasure);
+            if (Date.now() > pleasureLockedUntil) {
+              currentPleasure = Number(newReading.pleasure);
+            }
             scheduleChartUpdate();
           }
         );
@@ -1323,7 +1326,7 @@
       <div class="statBoxes">
         <div class="statBoxButton" title="Click to halt pleasure immediately!"
           onclick={() => {
-            handleBasicChange("setMode", "manual");
+            handleBasicChange("setMode", "MANUAL");
             handleBasicChange("setMotor", 0);
             currentPleasure = 0;
           }}
@@ -1428,7 +1431,7 @@
         class="belowCircleButton"
         style="background-color: darkorange; border-color: orange;"
         onclick={() => {
-          handleBasicChange("setMode", "manual");
+          handleBasicChange("setMode", "MANUAL");
           handleBasicChange("setMotor", 0);
           currentPleasure = 0;
         }}>Manual Full-Stop
@@ -1721,6 +1724,7 @@
         style="width: 100%;accent-color: orange; background: linear-gradient(to right, orange 0%, orange 100%);"
         oninput={() => {
             //console.log("Dragging pleasure to ", currentPleasure);
+            pleasureLockedUntil = Date.now() + 500;
             debouncedBasicChange("setMotor",currentPleasure )
             //handleBasicChange("setMotor",currentPleasure )
           }
@@ -1796,6 +1800,7 @@
         style="width: 100%;accent-color: orange; background: linear-gradient(to right, orange 0%, orange 100%);"
         oninput={() => {
             //console.log("Dragging pleasure to ", currentPleasure);
+            pleasureLockedUntil = Date.now() + 500;
             debouncedBasicChange("setMotor",currentPleasure )
             //handleBasicChange("setMotor",currentPleasure )
           }

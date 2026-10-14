@@ -110,7 +110,11 @@ void orgasm_control_set_pleasure_ex(uint8_t pleasure, bool use_motor) {
         #endif
     }
 
-    //output_state.pleasure = pleasure;
+    // Only track externally-set pleasure in manual mode; in automatic modes the
+    // vibration controller owns output_state.pleasure.
+    if (output_state.output_mode == OC_MANUAL) {
+        output_state.pleasure = pleasure;
+    }
 }
 
 /**

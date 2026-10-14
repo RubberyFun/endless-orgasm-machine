@@ -66,34 +66,36 @@ static void ble_task(void* args) {
 }
 
 
+// Runs in its own low-priority task so file I/O and websocket sends never stall orgasm_control_tick().
 static void loop_task(void* args) {
-    // for (;;) {
     static long lastStatusTick = 0;
     static long lastTick = 0;
 
-    // Periodically send out WiFi status:
-    if (millis() - lastStatusTick > 1000 * 10) {
-        lastStatusTick = millis();
-        api_broadcast_network_status();
+    for (;;) {
+        // Periodically send out WiFi status:
+        if (millis() - lastStatusTick > 1000 * 10) {
+            lastStatusTick = millis();
+            api_broadcast_network_status();
+        }
+
+        if (millis() - lastTick > 1000 / 15) {
+            ESP_LOGD(
+                TAG,
+                "%%heap=%d, min=%d, internal=%d",
+                esp_get_free_heap_size(),
+                esp_get_minimum_free_heap_size(),
+                esp_get_free_internal_heap_size()
+            );
+
+            lastTick = millis();
+            api_broadcast_readings();
+        }
+
+        // Tick and see if we need to save config:
+        config_enqueue_save(-1);
+
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
-
-    if (millis() - lastTick > 1000 / 15) {
-        ESP_LOGD(
-            TAG,
-            "%%heap=%d, min=%d, internal=%d",
-            esp_get_free_heap_size(),
-            esp_get_minimum_free_heap_size(),
-            esp_get_free_internal_heap_size()
-        );
-
-        lastTick = millis();
-        api_broadcast_readings();
-    }
-
-    // Tick and see if we need to save config:
-    config_enqueue_save(-1);
-
-    vTaskDelay(1);
 }
 
 
@@ -101,7 +103,6 @@ static void main_task(void* args) {
     orgasm_control_set_output_mode(OC_AUTOMATIC);
 
     for (;;) {
-        //loop_task(NULL);
         orgasm_control_tick();
         eom_hal_led_tick();
 
@@ -310,5 +311,6 @@ void app_main() {
     xTaskCreate(main_task, "MAIN", 1024 * 12, NULL, tskIDLE_PRIORITY + 1, NULL);
     xTaskCreate(ble_task, "BT", 1024 * 12, NULL, tskIDLE_PRIORITY + 2, NULL);
     xTaskCreate(sleep_monitor_task, "SLEEP", 1024 * 4, NULL, tskIDLE_PRIORITY, NULL);
+    xTaskCreate(loop_task, "LOOP", 1024 * 8, NULL, tskIDLE_PRIORITY, NULL);
     ESP_LOGI(TAG, "Tasks created, entering main loop.");
 }   

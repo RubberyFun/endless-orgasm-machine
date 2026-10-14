@@ -19,7 +19,12 @@ void running_average_init(running_average_t** ra, size_t window_size) {
     if (init == NULL)
         return;
 
-    init->buffer = (uint16_t*)malloc(sizeof(uint16_t) * window_size);
+    // calloc: the buffer must start zeroed, since sum subtracts each slot as it is overwritten.
+    init->buffer = (uint16_t*)calloc(window_size, sizeof(uint16_t));
+    if (init->buffer == NULL) {
+        free(init);
+        return;
+    }
     init->window = window_size;
     init->index = 0;
     init->value = 0;
